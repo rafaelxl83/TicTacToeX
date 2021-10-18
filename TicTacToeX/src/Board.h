@@ -19,24 +19,27 @@ class Board
 {
 public:
 										Board(
-											std::shared_ptr<EventTable>	anEvtTable);
+											unsigned int				anEvtTableId);
 										Board(
 											unsigned int				anId,
-											std::shared_ptr<EventTable>	anEvtTable);
+											unsigned int				anEvtTableId);
 										Board(
 											unsigned int				anId,
 											BoardSizes					theSize,
-											std::shared_ptr<EventTable>	anEvtTable);
+											unsigned int				anEvtTableId);
 										~Board();
 
 	unsigned int						GetID();
-	std::shared_ptr<EventTable>			GetEvtTable();
+	unsigned int						GetEvtTableID();
+
 	bool								SetMark(
 											Point						aPos,
 											Symbol						aSymbol);
 
 	std::weak_ptr<Row[]>				GetSector(
 											Point						aPos);
+
+	std::vector<Point>					GetMarkedPositions();
 
 	std::string							ToString() const;
 	
@@ -53,7 +56,7 @@ private:
 	unsigned int						myId;
 	short								mySize;
 	short								realSize;
-	std::shared_ptr<EventTable>			myEvtTable;
+	unsigned int						myEvtTableId;
 
 	std::shared_ptr<Row[]>				theSection;
 	std::unique_ptr<Row[]>				theBoard;
@@ -61,6 +64,7 @@ private:
 	std::unique_ptr<bool[]>				refHorizontal;
 	std::unique_ptr<bool[]>				refVertical;
 
+	std::vector<Point>					markedCells;
 };
 
-#define BOARD_DEFAULT_ID			static_cast<unsigned int>(GetHashID("BOARD15102344370000000"))
+#define BOARD_DEFAULT_ID				static_cast<unsigned int>(GetHashID("BOARD15102344370000000"))

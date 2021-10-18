@@ -10,35 +10,38 @@
 #include <sstream>
 
 Board::Board(
-	std::shared_ptr<EventTable>	anEvtTable)
+	unsigned int 				anEvtTableId)
 	: Board(
 		BOARD_DEFAULT_ID,
 		BoardSizes::TwoPlayers,
-		anEvtTable)
+		anEvtTableId)
 {
 }
 
 Board::Board(
 	unsigned int				anId,
-	std::shared_ptr<EventTable>	anEvtTable)
+	unsigned int 				anEvtTableId)
 	: Board(
 		anId,
 		BoardSizes::TwoPlayers,
-		anEvtTable)
+		anEvtTableId)
 {
 }
 
 Board::Board(
 	unsigned int				anId,
 	BoardSizes					theSize,
-	std::shared_ptr<EventTable>	anEvtTable)
+	unsigned int 				anEvtTableId)
 	: myId(anId)
-	, myEvtTable(anEvtTable)
+	, myEvtTableId(anEvtTableId)
 {
 	Union u;
 	u.s = theSize;
 	mySize = u.i;
 	realSize = mySize + 2 * VERIFICATION_ADJUSTMENT;
+
+	Initialize();
+
 	Log("[Board]", myId, "Created", ToString());
 }
 
@@ -52,10 +55,10 @@ Board::GetID()
 	return myId;
 }
 
-std::shared_ptr<EventTable>
-Board::GetEvtTable()
+unsigned int
+Board::GetEvtTableID()
 {
-	return myEvtTable;
+	return myEvtTableId;
 }
 
 bool 
@@ -64,13 +67,22 @@ Board::SetMark(
 	Symbol						aSymbol
 )
 {
+	// invalid parameters
 	if (aPos.x >= mySize || aPos.y >= mySize)
+		return false;
+
+	// point already marked
+	if (refHorizontal[aPos.x] && refVertical[aPos.y])
 		return false;
 
 	theBoard
 		[aPos.x + VERIFICATION_ADJUSTMENT]
 		[aPos.y + VERIFICATION_ADJUSTMENT] = aSymbol;
 
+	refHorizontal[aPos.x]	= true;
+	refVertical[aPos.y]		= true;
+
+	markedCells.push_back(Point(aPos.x, aPos.y));
 	return true;
 }
 
@@ -88,6 +100,12 @@ Board::GetSector(
 	return theSection;
 }
 
+std::vector<Point>
+Board::GetMarkedPositions()
+{
+	return markedCells;
+}
+
 void 
 Board::Initialize()
 {
@@ -99,6 +117,11 @@ Board::Initialize()
 		if(i < 3) theSection[i] = Row(3, 0);
 		theBoard[i] = Row(realSize, 0);
 	}
+
+	refHorizontal = std::unique_ptr<bool[]>(new bool[mySize]);
+	refVertical = std::unique_ptr<bool[]>(new bool[mySize]);
+
+	markedCells = std::vector<Point>();
 }
 
 std::string

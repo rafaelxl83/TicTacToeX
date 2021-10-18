@@ -28,6 +28,45 @@ struct Point
 {
 	unsigned short x = 0;
 	unsigned short y = 0;
+
+	Point()
+	:Point(0,0)
+	{
+	}
+
+	Point(
+		unsigned short x, 
+		unsigned short y)
+	{
+		this->x = x;
+		this->y = y;
+	}
+
+	Point operator&=(
+		Point& aPoint)
+	{
+		if (this == _STD addressof(aPoint)) {
+			return *this;
+		}
+
+		this->x = aPoint.x;
+		this->y = aPoint.y;
+		return *this;
+	}
+
+	friend std::ostream& operator<<(
+		std::ostream& os, 
+		const Point& obj)
+	{
+		return os << "[" << obj.x << "," << obj.y << "]";
+	}
+
+	friend std::istream& operator<<(
+		std::istream& is, 
+		const Point& obj)
+	{
+		return is;
+	}
 };
 
 unsigned int

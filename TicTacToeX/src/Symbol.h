@@ -47,6 +47,24 @@ public:
 		return myProperty;
 	}
 
+	friend std::ostream& operator<<(
+		std::ostream& os, 
+		const Symbol& obj)
+	{
+		return os << obj.myProperty.symbol
+#ifdef _DEBUG
+			<< "[" << obj.myProperty.value << "]"
+#endif
+			;
+	}
+
+	friend std::istream& operator<<(
+		std::istream& is, 
+		const Symbol& obj)
+	{
+		return is;
+	}
+
 private:
 	enum class AvailableSymbols : int
 	{

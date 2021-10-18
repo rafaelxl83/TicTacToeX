@@ -12,7 +12,9 @@ struct EventRow
 	char			playerSymbol = 'X';
 	Point			position;
 
-	friend std::ostream& operator<<(std::ostream& os, const EventRow& obj) 
+	friend std::ostream& operator<<(
+		std::ostream& os, 
+		const EventRow& obj) 
 	{
 		return os << "(" << 
 			obj.timestamp << " - " << 
@@ -21,7 +23,9 @@ struct EventRow
 			obj.position.y << "])";
 	}
 
-	friend std::istream& operator<<(std::istream& is, const EventRow& obj) 
+	friend std::istream& operator<<(
+		std::istream& is, 
+		const EventRow& obj) 
 	{
 		return is;
 	}
@@ -43,7 +47,7 @@ public:
 	unsigned int						GetID();
 
 	std::vector<EventRow>				GetAllEvents();
-	std::vector<EventRow>				GetPlayerEvents(
+	std::vector<EventRow>				GetPlayersEvents(
 											unsigned int				aPlayerID);
 	std::vector<EventRow>				GetPlayersEvents(
 											std::list<unsigned int>		thePlayersID);
@@ -59,4 +63,4 @@ private:
 
 };
 
-#define EVT_DEFAULT_ID			static_cast<unsigned int>(GetHashID("EVTTABLE15102344370000000"))
+#define EVT_DEFAULT_ID					static_cast<unsigned int>(GetHashID("EVTTABLE15102344370000000"))

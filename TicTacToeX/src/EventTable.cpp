@@ -83,30 +83,30 @@ EventTable::GetAllEvents()
 }
 
 std::vector<EventRow>
-EventTable::GetPlayerEvents(
+EventTable::GetPlayersEvents(
 	unsigned int				aPlayerID)
 {
-	std::vector<EventRow> evt;
+	//std::vector<EventRow> evt;
 
-	try
-	{
-		// linear complexity O(n)
-		std::ranges::copy_if(
-			allPlayedEvents, 
-			std::back_inserter(evt),
-			[aPlayerID](EventRow& e) { return (e.playerID == aPlayerID); }
-		);
-	}
-	catch (std::out_of_range& ex)
-	{
-		Log("[EventTable]", myId, "GetPlayerEvents", "Exception", ex.what());
-	}
-	catch (...)
-	{
-		Log("[EventTable]", myId, "GetPlayerEvents", "Unhandled Exception:", ExceptionHelper::what());
-	}
+	//try
+	//{
+	//	// linear complexity O(n)
+	//	std::ranges::copy_if(
+	//		allPlayedEvents, 
+	//		std::back_inserter(evt),
+	//		[aPlayerID](EventRow& e) { return (e.playerID == aPlayerID); }
+	//	);
+	//}
+	//catch (std::out_of_range& ex)
+	//{
+	//	Log("[EventTable]", myId, "GetPlayerEvents", "Exception", ex.what());
+	//}
+	//catch (...)
+	//{
+	//	Log("[EventTable]", myId, "GetPlayerEvents", "Unhandled Exception:", ExceptionHelper::what());
+	//}
 
-	return evt;
+	return GetPlayersEvents( std::list<unsigned int>{ aPlayerID } );
 }
 
 std::vector<EventRow>
@@ -121,6 +121,7 @@ EventTable::GetPlayersEvents(
 
 	try 
 	{
+		// linear complexity O(n)
 		std::ranges::copy_if(
 			allPlayedEvents, 
 			std::back_inserter(evt), 

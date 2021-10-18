@@ -12,6 +12,7 @@
 #include "..\TicTacToeX\lib\Utils.h"
 #include "..\TicTacToeX\src\Symbol.h"
 #include "..\TicTacToeX\src\EventTable.h"
+#include "..\TicTacToeX\src\Board.h"
 #pragma endregion
 
 template<typename Base, typename T>
@@ -28,6 +29,8 @@ namespace TTTXTestSuit
 	class Helper
 	{
 	public:
+
+#pragma region "Log Helper"
 		static void
 			Trace(
 				const char* file,
@@ -102,6 +105,137 @@ namespace TTTXTestSuit
 			wcstombs_s(&i, *c, (size_t)256, lpw, (size_t)256);
 		}
 #endif
+
+#pragma endregion
+
+#pragma region "Game basic items for test Helper"
+
+		class GameBase4Test
+		{
+		public:
+			GameBase4Test() 
+			{ 
+				InitializeGame(); 
+			}
+
+			void InitializeGame()
+			{
+				char player_id[128];
+				char evt_id[128];
+				double timestamp;
+
+				timestamp = std::chrono::system_clock::now().time_since_epoch().count();
+				sprintf_s(evt_id, "EVTTABLE%.lf", timestamp);
+				evt = EventTable(GetHashID(evt_id));
+
+				timestamp = std::chrono::system_clock::now().time_since_epoch().count();
+				sprintf_s(player_id, "PLAYERID%.lf", timestamp);
+				p1ID = GetHashID(player_id);
+				s1 = new Symbol(1);
+
+				timestamp = std::chrono::system_clock::now().time_since_epoch().count();
+				sprintf_s(player_id, "PLAYERID%.lf", timestamp + 1);
+				p2ID = GetHashID(player_id);
+				s2 = new Symbol(2);
+
+				timestamp = std::chrono::system_clock::now().time_since_epoch().count();
+				sprintf_s(player_id, "PLAYERID%.lf", timestamp + 2);
+				p3ID = GetHashID(player_id);
+				s2 = new Symbol(3);
+			}
+
+			void Emulate1PlayerEvents()
+			{
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos1.x = 0; pos1.y = 1;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos1.x = 0; pos1.y = 2;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos1.x = 1; pos1.y = 0;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos1.x = 1; pos1.y = 1;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos1.x = 1; pos1.y = 2;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos1.x = 2; pos1.y = 0;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos1.x = 2; pos1.y = 1;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos1.x = 2; pos1.y = 2;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+			}
+
+			void Emulate2PlayerEvents()
+			{
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 0; pos2.y = 1;
+				evt.RegisterEvent(p2ID, *s2, pos2);
+				pos1.x = 0; pos1.y = 2;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 1; pos2.y = 0;
+				evt.RegisterEvent(p2ID, *s2, pos2);
+				pos1.x = 1; pos1.y = 1;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 1; pos2.y = 2;
+				evt.RegisterEvent(p2ID, *s2, pos2);
+				pos1.x = 2; pos1.y = 0;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 2; pos2.y = 1;
+				evt.RegisterEvent(p2ID, *s2, pos2);
+				pos1.x = 2; pos1.y = 2;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+			}
+
+			void Emulate3PlayerEvents()
+			{
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 0; pos2.y = 1;
+				evt.RegisterEvent(p2ID, *s2, pos2);
+				pos3.x = 0; pos3.y = 2;
+				evt.RegisterEvent(p3ID, *s3, pos3);
+
+				pos1.x = 0; pos1.y = 3;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 1; pos2.y = 0;
+				evt.RegisterEvent(p2ID, *s2, pos2);
+				pos3.x = 1; pos3.y = 1;
+				evt.RegisterEvent(p3ID, *s3, pos3);
+
+				pos1.x = 1; pos1.y = 2;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 1; pos2.y = 3;
+				evt.RegisterEvent(p2ID, *s2, pos2);
+				pos3.x = 2; pos3.y = 0;
+				evt.RegisterEvent(p3ID, *s3, pos3);
+
+				pos1.x = 2; pos1.y = 1;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 2; pos2.y = 3;
+				evt.RegisterEvent(p2ID, *s2, pos2);
+				pos3.x = 3; pos3.y = 0;
+				evt.RegisterEvent(p3ID, *s3, pos3);
+
+				pos1.x = 3; pos1.y = 1;
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 3; pos2.y = 3;
+				evt.RegisterEvent(p2ID, *s2, pos2);
+			}
+
+			EventTable evt;
+
+			Symbol* s1;
+			Point pos1;
+			unsigned int p1ID;
+
+			Symbol* s2;
+			Point pos2;
+			unsigned int p2ID;
+
+			Symbol* s3;
+			Point pos3;
+			unsigned int p3ID;
+		};
+#pragma endregion
 	};
 #pragma endregion
 
@@ -295,7 +429,7 @@ namespace TTTXTestSuit
 			Assert::AreEqual((int)last.position.y, (int)p1.y);
 		}
 
-		TEST_METHOD(GetPlayerEventsTest)
+		TEST_METHOD(Get1PlayerEventsTest)
 		{
 			Symbol s1(1);
 			Symbol s2(2);
@@ -321,20 +455,20 @@ namespace TTTXTestSuit
 			p1.x = 2; p1.y = 2;
 			evt.RegisterEvent(p1ID, s1, p1);
 
-			std::vector<EventRow> r = evt.GetPlayerEvents(p2ID);
+			std::vector<EventRow> r = evt.GetPlayersEvents(p2ID);
 
 			char buffer[128];
 			for (EventRow &e : r)
 			{
 				sprintf_s(buffer, "timestamp [%.lf], player [%u]", e.timestamp, e.playerID);
-				TEST_OUTPUT(L"GetPlayerEventsTest: %s", Helper::mbs2wcs(buffer));
+				TEST_OUTPUT(L"Get1PlayerEventsTest: %s", Helper::mbs2wcs(buffer));
 			}
 
 			EventRow last = *--r.end();
 			Assert::AreEqual(last.playerID, p2ID);
 		}
 
-		TEST_METHOD(GetPlayersEventsTest)
+		TEST_METHOD(Get2PlayersEventsTest)
 		{
 			Symbol s1(1);
 			Symbol s2(2);
@@ -383,7 +517,7 @@ namespace TTTXTestSuit
 			for (EventRow& e : r)
 			{
 				sprintf_s(buffer, "timestamp [%.lf], player [%u]", e.timestamp, e.playerID);
-				TEST_OUTPUT(L"GetPlayersEventsTest: %s", Helper::mbs2wcs(buffer));
+				TEST_OUTPUT(L"Get2PlayerEventsTest: %s", Helper::mbs2wcs(buffer));
 			}
 
 			EventRow last = *--r.end();
@@ -397,11 +531,14 @@ namespace TTTXTestSuit
 	TEST_CLASS(BoardUnitTest)
 	{
 	public:
+		std::shared_ptr<Helper::GameBase4Test> emu;
+		Board* board;
 
 #pragma region "Initialize and cleanup tests"
 		TEST_METHOD_INITIALIZE(Startup)
 		{
 			// method initialization code
+			emu = std::make_shared<Helper::GameBase4Test>(Helper::GameBase4Test());
 		}
 
 		TEST_METHOD_CLEANUP(End)
@@ -411,8 +548,15 @@ namespace TTTXTestSuit
 #pragma endregion
 
 #pragma region "Unit Tests"
+		TEST_METHOD(DefaultTableTest)
+		{
+			board = new Board(emu->evt.GetID());
+			Assert::AreEqual((int)board->theBoard.get()->size(), 7);
+		}
+
 		TEST_METHOD(TestMethod1)
 		{
+			Assert::AreEqual("", "");
 		}
 #pragma endregion
 	};
@@ -438,6 +582,7 @@ namespace TTTXTestSuit
 #pragma region "Unit Tests"
 		TEST_METHOD(TestMethod1)
 		{
+			Assert::AreEqual("", "");
 		}
 #pragma endregion
 	};
