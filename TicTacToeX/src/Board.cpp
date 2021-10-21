@@ -12,8 +12,8 @@
 Board::Board(
 	unsigned int 				anEvtTableId)
 	: Board(
-		BOARD_DEFAULT_ID,
 		BoardSizes::TwoPlayers,
+		BOARD_DEFAULT_ID,
 		anEvtTableId)
 {
 }
@@ -22,15 +22,15 @@ Board::Board(
 	unsigned int				anId,
 	unsigned int 				anEvtTableId)
 	: Board(
-		anId,
 		BoardSizes::TwoPlayers,
+		anId,
 		anEvtTableId)
 {
 }
 
 Board::Board(
-	unsigned int				anId,
 	BoardSizes					theSize,
+	unsigned int				anId,
 	unsigned int 				anEvtTableId)
 	: myId(anId)
 	, myEvtTableId(anEvtTableId)
@@ -61,32 +61,7 @@ Board::GetEvtTableID()
 	return myEvtTableId;
 }
 
-bool 
-Board::SetMark(
-	Point						aPos,
-	Symbol						aSymbol
-)
-{
-	// invalid parameters
-	if (aPos.x >= mySize || aPos.y >= mySize)
-		return false;
-
-	// point already marked
-	if (refHorizontal[aPos.x] && refVertical[aPos.y])
-		return false;
-
-	theBoard
-		[aPos.x + VERIFICATION_ADJUSTMENT]
-		[aPos.y + VERIFICATION_ADJUSTMENT] = aSymbol;
-
-	refHorizontal[aPos.x]	= true;
-	refVertical[aPos.y]		= true;
-
-	markedCells.push_back(Point(aPos.x, aPos.y));
-	return true;
-}
-
-std::weak_ptr<Row[]> 
+std::weak_ptr<Row[]>
 Board::GetSector(
 	Point						aPos
 )
@@ -106,11 +81,43 @@ Board::GetMarkedPositions()
 	return markedCells;
 }
 
+bool 
+Board::SetMark(
+	Point						aPos,
+	Symbol						aSymbol
+)
+{
+	// invalid parameters
+	if (aSymbol.GetProperty().value == 0)
+		return false;
+	if (aPos.x >= mySize || aPos.y >= mySize)
+		return false;
+	// point already marked
+	if (theBoard
+		[aPos.x + VERIFICATION_ADJUSTMENT]
+		[aPos.y + VERIFICATION_ADJUSTMENT].
+			GetProperty().value != (int)Symbol::AvailableSymbols::empty)
+		return false;
+
+	theBoard
+		[aPos.x + VERIFICATION_ADJUSTMENT]
+		[aPos.y + VERIFICATION_ADJUSTMENT] = aSymbol;
+
+	markedCells.push_back(Point(aPos.x, aPos.y));
+	return true;
+}
+
+bool
+Board::IsFull()
+{
+	return markedCells.size() == mySize * mySize;
+}
+
 void 
 Board::Initialize()
 {
 	theBoard = std::unique_ptr<Row[]>(new Row[realSize]);
-	std::shared_ptr<Row[]> theSection = std::shared_ptr<Row[]>(new Row[3]);
+	theSection = std::shared_ptr<Row[]>(new Row[3]);
 
 	for (int i = 0; i < realSize; ++i)
 	{
@@ -118,14 +125,34 @@ Board::Initialize()
 		theBoard[i] = Row(realSize, 0);
 	}
 
-	refHorizontal = std::unique_ptr<bool[]>(new bool[mySize]);
-	refVertical = std::unique_ptr<bool[]>(new bool[mySize]);
-
 	markedCells = std::vector<Point>();
 }
 
 std::string
 Board::ToString() const
 {
-	return "";
+	std::string line;
+	std::stringbuf buffer;
+	std::ostream os(&buffer);
+
+#ifdef _DEBUG
+	line.insert(0, mySize * 5, '-');
+#else
+	line.insert(0, mySize*3, '-');
+#endif
+
+	for (int i = VERIFICATION_ADJUSTMENT; i < mySize + VERIFICATION_ADJUSTMENT; i++)
+	{
+		std::copy(
+			theBoard[i].begin() + VERIFICATION_ADJUSTMENT,
+			theBoard[i].end() - VERIFICATION_ADJUSTMENT,
+			std::ostream_iterator<Symbol>(os, "|"));
+		os << std::endl << line << std::endl;
+	}
+
+	return "Board - State: "
+		+ std::to_string(myId)
+		+ "\n"
+		+ buffer.str()
+		+ '\n';
 }

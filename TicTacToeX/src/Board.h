@@ -24,22 +24,22 @@ public:
 											unsigned int				anId,
 											unsigned int				anEvtTableId);
 										Board(
-											unsigned int				anId,
 											BoardSizes					theSize,
+											unsigned int				anId,
 											unsigned int				anEvtTableId);
 										~Board();
 
 	unsigned int						GetID();
 	unsigned int						GetEvtTableID();
+	std::weak_ptr<Row[]>				GetSector(
+											Point						aPos);
+	std::vector<Point>					GetMarkedPositions();
 
 	bool								SetMark(
 											Point						aPos,
 											Symbol						aSymbol);
 
-	std::weak_ptr<Row[]>				GetSector(
-											Point						aPos);
-
-	std::vector<Point>					GetMarkedPositions();
+	bool								IsFull();
 
 	std::string							ToString() const;
 	
@@ -60,9 +60,6 @@ private:
 
 	std::shared_ptr<Row[]>				theSection;
 	std::unique_ptr<Row[]>				theBoard;
-
-	std::unique_ptr<bool[]>				refHorizontal;
-	std::unique_ptr<bool[]>				refVertical;
 
 	std::vector<Point>					markedCells;
 };

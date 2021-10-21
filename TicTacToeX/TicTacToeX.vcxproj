@@ -153,6 +153,7 @@
     <ClCompile Include="src\EventTable.cpp" />
     <ClCompile Include="src\ExceptionHelper.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Symbol.cpp" />
     <ClCompile Include="src\WorkerCompanion.cpp" />
   </ItemGroup>
   <ItemGroup>

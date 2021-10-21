@@ -50,7 +50,7 @@ EventTable::RegisterEvent(
 		allPlayedEvents.push_back(EventRow(
 			timestamp, 
 			aPlayerID, 
-			aSymbol.GetProperty().symbol, 
+			aSymbol.GetProperty().ico, 
 			aPosition
 		));
 

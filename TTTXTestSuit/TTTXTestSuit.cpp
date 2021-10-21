@@ -109,7 +109,6 @@ namespace TTTXTestSuit
 #pragma endregion
 
 #pragma region "Game basic items for test Helper"
-
 		class GameBase4Test
 		{
 		public:
@@ -141,9 +140,31 @@ namespace TTTXTestSuit
 				timestamp = std::chrono::system_clock::now().time_since_epoch().count();
 				sprintf_s(player_id, "PLAYERID%.lf", timestamp + 2);
 				p3ID = GetHashID(player_id);
-				s2 = new Symbol(3);
+				s3 = new Symbol(3);
 			}
 
+			std::string Board3x3ToStr(std::shared_ptr<Row[]> board, char* separator, bool nl)
+			{
+				std::string line;
+				std::stringbuf buffer;
+				std::ostream os(&buffer);
+
+				line.insert(0, 15, '-');
+
+				for (int i = 0; i < 3; i++)
+				{
+					std::copy(
+						board[i].begin(),
+						board[i].end(),
+						std::ostream_iterator<Symbol>(os, separator));
+					if(nl)
+						os << std::endl << line << std::endl;
+				}
+
+				return buffer.str();
+			}
+
+#pragma region "Emulate Player Events"
 			void Emulate1PlayerEvents()
 			{
 				evt.RegisterEvent(p1ID, *s1, pos1);
@@ -220,7 +241,172 @@ namespace TTTXTestSuit
 				pos2.x = 3; pos2.y = 3;
 				evt.RegisterEvent(p2ID, *s2, pos2);
 			}
+#pragma endregion
 
+#pragma region "Emulate Player Board Actions"
+			void Emulate1PlayerBoardActions(Board* aBoard)
+			{
+				if (aBoard == nullptr) return;
+
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				TEST_OUTPUT(L"Emulate1PlayerBoardActions: %s", 
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+
+				pos1.x = 0; pos1.y = 1;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				TEST_OUTPUT(L"Emulate1PlayerBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+
+				pos1.x = 0; pos1.y = 2;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				TEST_OUTPUT(L"Emulate1PlayerBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+
+				pos1.x = 1; pos1.y = 0;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				TEST_OUTPUT(L"Emulate1PlayerBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+
+				pos1.x = 1; pos1.y = 1;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				TEST_OUTPUT(L"Emulate1PlayerBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+
+				pos1.x = 1; pos1.y = 2;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				TEST_OUTPUT(L"Emulate1PlayerBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+
+				pos1.x = 2; pos1.y = 0;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				TEST_OUTPUT(L"Emulate1PlayerBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+
+				pos1.x = 2; pos1.y = 1;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				TEST_OUTPUT(L"Emulate1PlayerBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+
+				pos1.x = 2; pos1.y = 2;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				TEST_OUTPUT(L"Emulate1PlayerBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+			}
+
+			void Emulate2PlayersBoardActions(Board* aBoard)
+			{
+				TEST_OUTPUT(L"Emulate2PlayersBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 0; pos2.y = 1;
+				aBoard->SetMark(pos2, *s2);
+				evt.RegisterEvent(p2ID, *s2, pos2);
+
+				pos1.x = 0; pos1.y = 2;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 1; pos2.y = 0;
+				aBoard->SetMark(pos2, *s2);
+				evt.RegisterEvent(p2ID, *s2, pos2);
+
+				pos1.x = 1; pos1.y = 1;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 1; pos2.y = 2;
+				aBoard->SetMark(pos2, *s2);
+				evt.RegisterEvent(p2ID, *s2, pos2);
+
+				pos1.x = 2; pos1.y = 0;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 2; pos2.y = 1;
+				aBoard->SetMark(pos2, *s2);
+				evt.RegisterEvent(p2ID, *s2, pos2);
+
+				pos1.x = 2; pos1.y = 2;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				TEST_OUTPUT(L"Emulate2PlayersBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+			}
+
+			void Emulate3PlayersBoardActions(Board* aBoard)
+			{
+				TEST_OUTPUT(L"Emulate3PlayersBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 0; pos2.y = 1;
+				aBoard->SetMark(pos2, *s2);
+				evt.RegisterEvent(p2ID, *s2, pos2);
+				pos3.x = 0; pos3.y = 2;
+				aBoard->SetMark(pos3, *s3);
+				evt.RegisterEvent(p3ID, *s3, pos3);
+
+				pos1.x = 0; pos1.y = 3;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 1; pos2.y = 0;
+				aBoard->SetMark(pos2, *s2);
+				evt.RegisterEvent(p2ID, *s2, pos2);
+				pos3.x = 1; pos3.y = 1;
+				aBoard->SetMark(pos3, *s3);
+				evt.RegisterEvent(p3ID, *s3, pos3);
+
+				pos1.x = 1; pos1.y = 2;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 1; pos2.y = 3;
+				aBoard->SetMark(pos2, *s2);
+				evt.RegisterEvent(p2ID, *s2, pos2);
+
+				TEST_OUTPUT(L"Emulate3PlayersBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+
+				pos3.x = 2; pos3.y = 0;
+				aBoard->SetMark(pos3, *s3);
+				evt.RegisterEvent(p3ID, *s3, pos3);
+
+				pos1.x = 2; pos1.y = 1;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 2; pos2.y = 2;
+				aBoard->SetMark(pos2, *s2);
+				evt.RegisterEvent(p2ID, *s2, pos2);
+				pos3.x = 2; pos3.y = 3;
+				aBoard->SetMark(pos3, *s3);
+				evt.RegisterEvent(p3ID, *s3, pos3);
+
+				pos1.x = 3; pos1.y = 0;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+				pos2.x = 3; pos2.y = 1;
+				aBoard->SetMark(pos2, *s2);
+				evt.RegisterEvent(p2ID, *s2, pos2);
+				pos3.x = 3; pos3.y = 2;
+				aBoard->SetMark(pos3, *s3);
+				evt.RegisterEvent(p3ID, *s3, pos3);
+
+				pos1.x = 3; pos1.y = 3;
+				aBoard->SetMark(pos1, *s1);
+				evt.RegisterEvent(p1ID, *s1, pos1);
+
+				TEST_OUTPUT(L"Emulate3PlayersBoardActions: %s",
+					Helper::mbs2wcs((char*)aBoard->ToString().c_str()));
+			}
+#pragma endregion
+
+#pragma region "Base test variables"
 			EventTable evt;
 
 			Symbol* s1;
@@ -234,6 +420,7 @@ namespace TTTXTestSuit
 			Symbol* s3;
 			Point pos3;
 			unsigned int p3ID;
+#pragma endregion
 		};
 #pragma endregion
 	};
@@ -263,7 +450,7 @@ namespace TTTXTestSuit
 			s = new Symbol(1);
 
 			TEST_OUTPUT(L"Symbol X: char X [%c]", s->GetProperty().symbol);
-			Assert::AreEqual(s->GetProperty().symbol, 'X');
+			Assert::AreEqual(s->GetProperty().ico, 'X');
 		}
 
 		TEST_METHOD(SymbolO)
@@ -304,7 +491,7 @@ namespace TTTXTestSuit
 			u.s = Symbol::AvailableSymbols::H;
 
 			TEST_OUTPUT(L"Symbol H: symbol H [%c]", s.GetProperty().symbol);
-			Assert::AreEqual(s.GetProperty().symbol, 'H');
+			Assert::AreEqual(s.GetProperty().ico, 'H');
 		}
 #pragma endregion
 	
@@ -533,12 +720,16 @@ namespace TTTXTestSuit
 	public:
 		std::shared_ptr<Helper::GameBase4Test> emu;
 		Board* board;
+		char board_id[128];
 
 #pragma region "Initialize and cleanup tests"
 		TEST_METHOD_INITIALIZE(Startup)
 		{
 			// method initialization code
 			emu = std::make_shared<Helper::GameBase4Test>(Helper::GameBase4Test());
+			
+			double timestamp = std::chrono::system_clock::now().time_since_epoch().count();
+			sprintf_s(board_id, "BOARD%.lf", timestamp);
 		}
 
 		TEST_METHOD_CLEANUP(End)
@@ -548,10 +739,76 @@ namespace TTTXTestSuit
 #pragma endregion
 
 #pragma region "Unit Tests"
-		TEST_METHOD(DefaultTableTest)
+		TEST_METHOD(DefaultBoardTest)
 		{
 			board = new Board(emu->evt.GetID());
 			Assert::AreEqual((int)board->theBoard.get()->size(), 7);
+		}
+
+		TEST_METHOD(BoardTestMark)
+		{
+			board = new Board(emu->evt.GetID());
+			emu->Emulate1PlayerBoardActions(board);
+
+			bool markSucceeded = board->SetMark(
+				emu->evt.allPlayedEvents[0].position, 
+				Symbol::AvailableSymbols::X);
+
+			Assert::AreEqual(markSucceeded, false);
+		}
+
+		TEST_METHOD(BoardTestTwoPlayers)
+		{
+			board = new Board(GetHashID(board_id), emu->evt.GetID());
+
+			bool completed = board->IsFull();
+
+			emu->Emulate2PlayersBoardActions(board);
+
+			completed = board->IsFull();
+
+			Assert::AreEqual(completed, true);
+		}
+
+		TEST_METHOD(BoardTestThreePlayers)
+		{
+			board = new Board(
+				BoardSizes::ThreePlayers,
+				GetHashID(board_id),
+				emu->evt.GetID());
+
+			emu->Emulate3PlayersBoardActions(board);
+
+			std::weak_ptr<Row[]> aSection = board->GetSector(Point());
+
+			std::string str = emu->Board3x3ToStr(aSection.lock(), (char*)"", false);
+
+			Assert::AreEqual(str.c_str(), " [0] [0] [0] [0]X[1]O[3] [0]O[3]M[6]");
+		}
+
+		TEST_METHOD(BoardTestSectionDiagonal)
+		{
+			board = new Board(
+				BoardSizes::ThreePlayers,
+				GetHashID(board_id),
+				emu->evt.GetID());
+
+			emu->Emulate3PlayersBoardActions(board);
+
+			std::weak_ptr<Row[]> aSection = board->GetSector(Point(1,1));
+			std::string str = emu->Board3x3ToStr(aSection.lock(), (char*)"|", true);
+			TEST_OUTPUT(L"BoardTestSectionDiagonal: \n%s",
+				Helper::mbs2wcs((char*)str.c_str()));
+
+			aSection = board->GetSector(Point(2, 2));
+			str = emu->Board3x3ToStr(aSection.lock(), (char*)"|", true);
+			TEST_OUTPUT(L"BoardTestSectionDiagonal: \n%s",
+				Helper::mbs2wcs((char*)str.c_str()));
+
+			aSection = board->GetSector(Point(3, 3));
+			str = emu->Board3x3ToStr(aSection.lock(), (char*)"", false);
+
+			Assert::AreEqual(str.c_str(), "O[3]M[6] [0]M[6]X[1] [0] [0] [0] [0]");
 		}
 
 		TEST_METHOD(TestMethod1)

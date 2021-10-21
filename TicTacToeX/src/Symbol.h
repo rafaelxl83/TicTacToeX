@@ -1,84 +1,53 @@
 #pragma once
-
-struct SymbolProperty
-{
-	char		symbol;
-	int			value;
-	int			victory;
-};
+#include <iostream>
 
 class Symbol
 {
 public:
-	Symbol(
-		unsigned short thePlayer)
+	enum class AvailableSymbols : int
 	{
-		Union u;
-		switch (thePlayer)
-		{
-			case 2:
-				u.s = AvailableSymbols::O;
-				myProperty.symbol = 'O';
-				break;
-			case 3:
-				u.s = AvailableSymbols::M;
-				myProperty.symbol = 'M';
-				break;
-			case 4:
-				u.s = AvailableSymbols::S;
-				myProperty.symbol = 'S';
-				break;
-			case 5:
-				u.s = AvailableSymbols::H;
-				myProperty.symbol = 'H';
-				break;
-			default:
-				u.s = AvailableSymbols::X;
-				myProperty.symbol = 'X';
-				break;
-		}
-
-		myProperty.value = u.i;
-		myProperty.victory = 3 * u.i;
-	}
-
-	SymbolProperty GetProperty()
+							empty	= 0,
+							X		= 1,
+							O		= 3,
+							M		= 6,
+							S		= 10,
+							H		= 15
+	};
+	struct SymbolProperty
 	{
-		return myProperty;
-	}
+		AvailableSymbols	symbol;
+		char				ico;
+		int					value;
+		int					victory;
+	};
+											Symbol(
+												AvailableSymbols			thePlayerSymbol);
+											Symbol(
+												unsigned short				thePlayerTurn);
+
+	SymbolProperty							GetProperty();
 
 	friend std::ostream& operator<<(
-		std::ostream& os, 
+		std::ostream& os,
 		const Symbol& obj)
 	{
-		return os << obj.myProperty.symbol
+		return os << obj.myProperty.ico
 #ifdef _DEBUG
 			<< "[" << obj.myProperty.value << "]"
 #endif
 			;
 	}
 
-	friend std::istream& operator<<(
-		std::istream& is, 
-		const Symbol& obj)
-	{
-		return is;
-	}
-
 private:
-	enum class AvailableSymbols : int
-	{
-		X = 1,
-		O = 3,
-		M = 6,
-		S = 10,
-		H = 15
-	};
 	union Union
 	{
 		AvailableSymbols	s;
 		int					i;
 	};
+
+	void									SetProperty(
+												Union						u, 
+												char						ico);
 
 	SymbolProperty			myProperty;
 
