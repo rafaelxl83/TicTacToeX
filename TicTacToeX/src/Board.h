@@ -64,4 +64,8 @@ private:
 	std::vector<Point>					markedCells;
 };
 
+#ifdef _DEBUG
 #define BOARD_DEFAULT_ID				static_cast<unsigned int>(GetHashID("BOARD15102344370000000"))
+#else
+#define BOARD_DEFAULT_ID				static_cast<unsigned int>(GetHashID(GenKey("BOARD")))
+#endif

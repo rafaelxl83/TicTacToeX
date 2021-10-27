@@ -69,6 +69,10 @@ struct Point
 	}
 };
 
+char*
+GenKey(
+	const char* aKeyword);
+
 unsigned int
 GetHashID(
 	std::string aKeyword);

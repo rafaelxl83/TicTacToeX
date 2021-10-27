@@ -136,18 +136,19 @@ Board::ToString() const
 	std::ostream os(&buffer);
 
 #ifdef _DEBUG
-	line.insert(0, mySize * 5, '-');
+	line.insert(0, mySize * 5, '_');
 #else
-	line.insert(0, mySize*3, '-');
+	line.insert(0, mySize*3, '_');
 #endif
 
 	for (int i = VERIFICATION_ADJUSTMENT; i < mySize + VERIFICATION_ADJUSTMENT; i++)
 	{
 		std::copy(
 			theBoard[i].begin() + VERIFICATION_ADJUSTMENT,
-			theBoard[i].end() - VERIFICATION_ADJUSTMENT,
+			theBoard[i].end() - VERIFICATION_ADJUSTMENT - 1,
 			std::ostream_iterator<Symbol>(os, "|"));
-		os << std::endl << line << std::endl;
+		os << (*(theBoard[i].end() - VERIFICATION_ADJUSTMENT - 1))   << std::endl
+		   << (i < mySize + VERIFICATION_ADJUSTMENT - 1 ? line : "") << std::endl;
 	}
 
 	return "Board - State: "

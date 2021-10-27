@@ -117,3 +117,18 @@ public:
 	{
 	}
 };
+
+class MessageShutdown
+	: public MessageGamePlayBase
+{
+public:
+	MessageShutdown()
+		: MessageGamePlayBase()
+	{
+	}
+	MessageShutdown(
+		unsigned int anId)
+		: MessageGamePlayBase(anId)
+	{
+	}
+};

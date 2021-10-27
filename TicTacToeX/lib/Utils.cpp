@@ -4,6 +4,17 @@
 
 std::mutex logMutex;
 
+char*
+GenKey(
+	const char* aKeyword)
+{
+	char key[128];
+	double timestamp = std::chrono::system_clock::now().time_since_epoch().count();
+	sprintf_s(key, "%s%.lf", aKeyword, timestamp);
+
+	return key;
+}
+
 unsigned int
 GetHashID(
 	std::string aKeyword)

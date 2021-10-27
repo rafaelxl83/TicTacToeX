@@ -7,25 +7,25 @@
 class Players
 {
 public:
-							Players();
-							~Players();
+										Players();
+										~Players();
 
-	virtual void			Start();
+	virtual void						Start();
 
-	virtual void			OnMessageStartOfGame(
-								const MessageStartOfGame&	aMessage) noexcept;
-	virtual void			OnMessageTurnChanged(
-								const MessageTurnChanged&	aMessage) noexcept;
-	virtual void			OnMessageSingleMove(
-								const MessageSingleMove&	aMessage) noexcept;
+	virtual void						OnMessageStartOfGame(
+											const MessageStartOfGame&	aMessage) noexcept;
+	virtual void						OnMessageTurnChanged(
+											const MessageTurnChanged&	aMessage) noexcept;
+	virtual void						OnMessageSingleMove(
+											const MessageSingleMove&	aMessage) noexcept;
 
-	void					Done();
+	void								Done();
 
 protected:
-	virtual void			Initialize();
+	virtual void						Initialize();
 
 private:
-	std::vector<Player*>	myPlayers;
-	unsigned int			myPlayersLimitCount;
-	bool					done = false;
+	std::vector<Player*>				myPlayers;
+	unsigned int						myPlayersLimitCount;
+	bool								done = false;
 };

@@ -3,6 +3,7 @@
 #include "GamePlayMessages.h"
 
 #include <mutex>
+#include <map>
 
 class GamePlay
 {
@@ -12,11 +13,8 @@ public:
 								std::list<Player>			allPlayers);
 							~GamePlay();
 
-	void					SetPlayers(
-								std::vector<Player>			allPlayers);
-
-	virtual void			Start();
-
+	virtual void			OnMessageShutdown(
+								const MessageShutdown&		aMessage) noexcept;
 	virtual void			OnMessageEndOfGame(
 								const MessageEndOfGame&		aMessage) noexcept;
 	virtual void			OnMessageStartOfGame(
@@ -29,8 +27,16 @@ public:
 								const MessageBlockMove&		aMessage) noexcept;
 	virtual void			OnMessageScorePoints(
 								const MessageScorePoints&	aMessage) noexcept;
-	
-	void					ShutDown();
+
+	virtual void			Start();
+	virtual void			ShutDown();
+
+	void					AddPlayer(
+								Player*						aPlayer);
+	void					SetPlayers(
+								std::vector<Player>			allPlayers);
+
+	std::string				PrintBoard();
 
 protected:
 	virtual void			Initialize();
@@ -39,6 +45,8 @@ protected:
 private:
 	std::vector<Player*>	myPlayers;
 	unsigned int			myPlayersCount;
+	short					myTurnCounter;
 	bool					shutDown = false;
+	std::map<short, Point>	boardMap;
 
 };

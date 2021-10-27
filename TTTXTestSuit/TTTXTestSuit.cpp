@@ -13,7 +13,10 @@
 #include "..\TicTacToeX\src\Symbol.h"
 #include "..\TicTacToeX\src\EventTable.h"
 #include "..\TicTacToeX\src\Board.h"
+#include "..\TicTacToeX\src\Player.h"
 #pragma endregion
+
+#define TEST_DEFAULT_ID					static_cast<unsigned int>(GetHashID(GenKey("TEST")))
 
 template<typename Base, typename T>
 inline bool instanceof(const T* ptr) {
@@ -120,12 +123,18 @@ namespace TTTXTestSuit
 			void InitializeGame()
 			{
 				char player_id[128];
-				char evt_id[128];
+				char tmp_id[128];
 				double timestamp;
 
 				timestamp = std::chrono::system_clock::now().time_since_epoch().count();
-				sprintf_s(evt_id, "EVTTABLE%.lf", timestamp);
-				evt = EventTable(GetHashID(evt_id));
+				sprintf_s(tmp_id, "EVTTABLE%.lf", timestamp);
+				evtID = GetHashID(tmp_id);
+				evt = EventTable();
+
+				timestamp = std::chrono::system_clock::now().time_since_epoch().count();
+				sprintf_s(tmp_id, "BOARD%.lf", timestamp);
+				boardID = GetHashID(tmp_id);
+				board = new Board(boardID, evtID);
 
 				timestamp = std::chrono::system_clock::now().time_since_epoch().count();
 				sprintf_s(player_id, "PLAYERID%.lf", timestamp);
@@ -149,15 +158,19 @@ namespace TTTXTestSuit
 				std::stringbuf buffer;
 				std::ostream os(&buffer);
 
-				line.insert(0, 15, '-');
+				line.insert(0, 15, '_');
+				line[4] = '|';
+				line[7] = '|';
 
 				for (int i = 0; i < 3; i++)
 				{
 					std::copy(
 						board[i].begin(),
-						board[i].end(),
+						board[i].end() - 1,
 						std::ostream_iterator<Symbol>(os, separator));
-					if(nl)
+					os << (*(board[i].end() - 1));
+					
+					if(nl && i < 2)
 						os << std::endl << line << std::endl;
 				}
 
@@ -408,6 +421,10 @@ namespace TTTXTestSuit
 
 #pragma region "Base test variables"
 			EventTable evt;
+			unsigned int evtID;
+
+			Board* board;
+			unsigned int boardID;
 
 			Symbol* s1;
 			Point pos1;
@@ -609,10 +626,11 @@ namespace TTTXTestSuit
 			p1.x = 2; p1.y = 2;
 			evt.RegisterEvent(p1ID, s1, p1);
 
-			std::weak_ptr<std::vector<EventRow>> all = std::make_shared<std::vector<EventRow>>(evt.GetAllEvents());
-			std::vector<EventRow> r = !all.expired() ? *all.lock() : evt.GetAllEvents();
+			std::weak_ptr<std::vector<EventTable::EventRow>> all = 
+				std::make_shared<std::vector<EventTable::EventRow>>(evt.GetAllEvents());
+			std::vector<EventTable::EventRow> r = !all.expired() ? *all.lock() : evt.GetAllEvents();
 
-			EventRow last = *--r.end();
+			EventTable::EventRow last = *--r.end();
 			Assert::AreEqual((int)last.position.y, (int)p1.y);
 		}
 
@@ -642,16 +660,16 @@ namespace TTTXTestSuit
 			p1.x = 2; p1.y = 2;
 			evt.RegisterEvent(p1ID, s1, p1);
 
-			std::vector<EventRow> r = evt.GetPlayersEvents(p2ID);
+			std::vector<EventTable::EventRow> r = evt.GetPlayersEvents(p2ID);
 
 			char buffer[128];
-			for (EventRow &e : r)
+			for (EventTable::EventRow &e : r)
 			{
 				sprintf_s(buffer, "timestamp [%.lf], player [%u]", e.timestamp, e.playerID);
 				TEST_OUTPUT(L"Get1PlayerEventsTest: %s", Helper::mbs2wcs(buffer));
 			}
 
-			EventRow last = *--r.end();
+			EventTable::EventRow last = *--r.end();
 			Assert::AreEqual(last.playerID, p2ID);
 		}
 
@@ -698,16 +716,16 @@ namespace TTTXTestSuit
 			evt.RegisterEvent(p2ID, s2, p2);
 
 			// 5p2ID 4p3ID
-			std::vector<EventRow> r = evt.GetPlayersEvents({ p2ID, p3ID });
+			std::vector<EventTable::EventRow> r = evt.GetPlayersEvents({ p2ID, p3ID });
 
 			char buffer[128];
-			for (EventRow& e : r)
+			for (EventTable::EventRow& e : r)
 			{
 				sprintf_s(buffer, "timestamp [%.lf], player [%u]", e.timestamp, e.playerID);
 				TEST_OUTPUT(L"Get2PlayerEventsTest: %s", Helper::mbs2wcs(buffer));
 			}
 
-			EventRow last = *--r.end();
+			EventTable::EventRow last = *--r.end();
 			Assert::AreEqual(last.playerID, p2ID);
 		}
 #pragma endregion
@@ -727,9 +745,7 @@ namespace TTTXTestSuit
 		{
 			// method initialization code
 			emu = std::make_shared<Helper::GameBase4Test>(Helper::GameBase4Test());
-			
-			double timestamp = std::chrono::system_clock::now().time_since_epoch().count();
-			sprintf_s(board_id, "BOARD%.lf", timestamp);
+			sprintf_s(board_id, "%s", GenKey("BOARD"));
 		}
 
 		TEST_METHOD_CLEANUP(End)
@@ -810,10 +826,89 @@ namespace TTTXTestSuit
 
 			Assert::AreEqual(str.c_str(), "O[3]M[6] [0]M[6]X[1] [0] [0] [0] [0]");
 		}
+#pragma endregion
+	};
+#pragma endregion
 
-		TEST_METHOD(TestMethod1)
+#pragma region "Player Unit Test"
+	TEST_CLASS(PlayerUnitTests)
+	{
+	public:
+		std::shared_ptr<Helper::GameBase4Test> emu;
+		Player* player;
+		char player_id[128];
+
+#pragma region "Initialize and cleanup tests"
+		TEST_METHOD_INITIALIZE(Startup)
 		{
-			Assert::AreEqual("", "");
+			// method initialization code
+			emu = std::make_shared<Helper::GameBase4Test>(Helper::GameBase4Test());
+			sprintf_s(player_id, "%s", GenKey("Player"));
+		}
+
+		TEST_METHOD_CLEANUP(End)
+		{
+			// test method cleanup  code
+		}
+#pragma endregion
+
+#pragma region "Unit Tests"
+		TEST_METHOD(PlayerCreationTest)
+		{
+			player = new Player(
+				"Momo2017", 
+				Symbol(
+					Symbol::AvailableSymbols::X));
+
+			Assert::AreEqual(
+				(int)player->GetPlayerSymbol().GetProperty().symbol, 
+				(int)Symbol::AvailableSymbols::X);
+		}
+
+		TEST_METHOD(PlayerMarkTest)
+		{
+			std::stringbuf buffer;
+			std::iostream input(&buffer);
+			input << 1;
+
+			player = new Player(
+				emu->p1ID,
+				"Momo2017",
+				Symbol(Symbol::AvailableSymbols::X),
+				input);
+
+			player->AddBoardId(emu->boardID);
+
+			unsigned int move = 0;
+			do
+			{
+				move = player->MakeAMove();
+				player->SetState(Player::PlayerState::Turn);
+			} while (move != 1);
+
+			player->SetState(Player::PlayerState::Idle);
+
+			Assert::AreEqual((int)move, 1);
+		}
+
+		TEST_METHOD(PlayerBoardListTest)
+		{
+			player = new Player(
+				"Momo2017",
+				Symbol(Symbol::AvailableSymbols::X));
+
+			unsigned int bIDs[5](0);
+
+			for (int i = 0; i < 5; i++)
+				bIDs[i] = GetHashID(GenKey("TEST" + i));
+
+			for (auto b : bIDs)
+				player->AddBoardId(b);
+
+			player->RemBoard(2);
+			player->RemBoard(bIDs[3]);
+
+			Assert::AreEqual((int)player->GetAllBoards().size(), 3);
 		}
 #pragma endregion
 	};

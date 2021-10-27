@@ -39,7 +39,8 @@ EventTable::RegisterEvent(
 		throw std::invalid_argument(
 			"Invalid argument: not a valid player ID.");
 	}
-	if (aSymbol.GetProperty().value < 0) {
+	if (aSymbol.GetProperty().value < 0) 
+	{
 		throw std::invalid_argument(
 			"Invalid argument: it isn't a valid symbol.");
 	}
@@ -69,7 +70,7 @@ EventTable::GetID()
 	return myId;
 }
 
-std::vector<EventRow>
+std::vector<EventTable::EventRow>
 EventTable::GetAllEvents()
 {
 	std::vector<EventRow> evt;
@@ -82,7 +83,7 @@ EventTable::GetAllEvents()
 	return evt;
 }
 
-std::vector<EventRow>
+std::vector<EventTable::EventRow>
 EventTable::GetPlayersEvents(
 	unsigned int				aPlayerID)
 {
@@ -109,7 +110,7 @@ EventTable::GetPlayersEvents(
 	return GetPlayersEvents( std::list<unsigned int>{ aPlayerID } );
 }
 
-std::vector<EventRow>
+std::vector<EventTable::EventRow>
 EventTable::GetPlayersEvents(
 	std::list<unsigned int>		thePlayersID)
 {

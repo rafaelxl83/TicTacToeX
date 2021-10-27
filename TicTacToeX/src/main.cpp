@@ -5,6 +5,8 @@
 
 #include "WorkerCompanion.h"
 
+#include <map>
+
 enum class EnumClass : int //set size for enum
 {
 	Zero, One, Two, Three, Four
@@ -18,7 +20,25 @@ union Union //This will allow us to convert
 
 int main()
 {
-	//PerformOneThousandHumans();
+	std::map<short, Point>	boardMap;
+
+	int size = 5;
+	int k = 1;
+	for (int i = 0; i < size; i++)
+	{
+		for(int j = 0; j < size; j++)
+			boardMap.insert(std::pair<int, Point>(k++, Point(i,j)));
+	}
+
+	Point pt = boardMap.at(2);
+
+	for (std::pair<int, Point> p : boardMap)
+	{
+		std::cout << "<" << p.first << ": " << p.second << ">" << std::endl;
+	}
+
+	system("CLS");
+	
 
 	Union un2;
 	un2.ec = EnumClass::Three;
@@ -33,7 +53,7 @@ int main()
 
 	typedef std::vector<int> Row;
 	std::unique_ptr<Row[]> theBoard;
-	int size = 3;
+	size = 3;
 
 	Row r(3, 0);
 	r[0];
@@ -47,33 +67,6 @@ int main()
 	std::cout << theBoard[1][1];
 
 	double timestamp = std::chrono::system_clock::now().time_since_epoch().count();
-
-	std::string text = "aaaaabbbbccc";
-	std::vector<int> count(25, 0);
-	for (int i = 0; i < text.length(); i++)
-	{
-		int index = text.at(i) - 97;
-		count[index]++;
-	}
-
-	std::string res = "";
-	for (int i = 0; i < 25; i++)
-	{
-		if (count[i] % 2 != 0)
-		{
-			char letter = i + 97;
-			res.push_back(letter);
-			res.push_back(',');
-		}
-	}
-
-	if (res.length() > 0)
-	{
-		res.pop_back();
-	}
-
-	else
-		res = "EMPTY";
 
 	return 0;
 }

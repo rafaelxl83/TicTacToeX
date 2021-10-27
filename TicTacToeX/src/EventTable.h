@@ -5,35 +5,35 @@
 #include "../lib/Utils.h"
 #include "Symbol.h"
 
-struct EventRow
-{
-	double			timestamp = 0;
-	unsigned int	playerID = 0;
-	char			playerSymbol = 'X';
-	Point			position;
-
-	friend std::ostream& operator<<(
-		std::ostream& os, 
-		const EventRow& obj) 
-	{
-		return os << "(" << 
-			obj.timestamp << " - " << 
-			obj.playerID << " [" << 
-			obj.position.x << "," << 
-			obj.position.y << "])";
-	}
-
-	friend std::istream& operator<<(
-		std::istream& is, 
-		const EventRow& obj) 
-	{
-		return is;
-	}
-};
-
 class EventTable
 {
 public:
+	struct EventRow
+	{
+		double			timestamp = 0;
+		unsigned int	playerID = 0;
+		char			playerSymbol = 'X';
+		Point			position;
+
+		friend std::ostream& operator<<(
+			std::ostream& os,
+			const EventRow& obj)
+		{
+			return os << "(" <<
+				obj.timestamp << " - " <<
+				obj.playerID << " [" <<
+				obj.position.x << "," <<
+				obj.position.y << "])";
+		}
+
+		friend std::istream& operator<<(
+			std::istream& is,
+			const EventRow& obj)
+		{
+			return is;
+		}
+	};
+
 										EventTable();
 										EventTable(
 											unsigned int				anId);
@@ -63,4 +63,8 @@ private:
 
 };
 
+#ifdef _DEBUG
 #define EVT_DEFAULT_ID					static_cast<unsigned int>(GetHashID("EVTTABLE15102344370000000"))
+#else
+#define EVT_DEFAULT_ID					static_cast<unsigned int>(GetHashID(GenKey("EVTTABLE")))
+#endif
