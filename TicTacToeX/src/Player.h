@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Board.h"
+#include <vector>
+
+#include "Symbol.h"
 
 class Player
 {

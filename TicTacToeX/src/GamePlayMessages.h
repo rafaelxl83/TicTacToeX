@@ -9,16 +9,37 @@ class MessageGamePlayBase
 public:
 	MessageGamePlayBase()
 		: MessageGamePlayBase(
-			DEFAULT_ID)
+			DEFAULT_ID, 0, 0)
 	{
 	}
 	MessageGamePlayBase(
 		unsigned int anId)
+		: MessageGamePlayBase(
+			anId, 0, 0)
+	{
+	}
+	MessageGamePlayBase(
+		unsigned int aPlayerId,
+		unsigned int aBoardId)
+		: MessageGamePlayBase(
+			DEFAULT_ID, 
+			aPlayerId,
+			aBoardId)
+	{
+	}
+	MessageGamePlayBase(
+		unsigned int anId,
+		unsigned int aPlayerId,
+		unsigned int aBoardId)
 		: callerId(anId)
+		, myPlayerId(aPlayerId)
+		, myBoardId(aBoardId)
 	{
 	}
 
 	unsigned int	callerId;
+	unsigned int	myPlayerId;
+	unsigned int	myBoardId;
 };
 
 class MessageEndOfGame
@@ -31,9 +52,25 @@ public:
 	}
 
 	MessageEndOfGame(
+		unsigned int anId)
+		: MessageGamePlayBase(anId)
+	{
+	}
+
+	MessageEndOfGame(
+		unsigned int aPlayerId,
+		unsigned int aBoardId)
+		: MessageGamePlayBase(
+			aPlayerId, aBoardId)
+	{
+	}
+
+	MessageEndOfGame(
 		unsigned int anId,
-		unsigned int boardID)
-	: MessageGamePlayBase(anId)
+		unsigned int aPlayerId,
+		unsigned int aBoardId)
+	: MessageGamePlayBase(
+		anId, aPlayerId, aBoardId)
 	{
 	}
 };
@@ -68,6 +105,41 @@ public:
 	: MessageGamePlayBase(anId)
 	{
 	}
+
+	MessageTurnChanged(
+		unsigned int anId,
+		unsigned int aBoardId)
+		: MessageGamePlayBase(
+			anId, aBoardId)
+	{
+	}
+
+	MessageTurnChanged(
+		int aTurnIdx)
+		: MessageGamePlayBase()
+		, turn(aTurnIdx)
+	{
+	}
+
+	MessageTurnChanged(
+		unsigned int anId,
+		int aTurnIdx)
+		: MessageGamePlayBase(anId)
+		, turn(aTurnIdx)
+	{
+	}
+
+	MessageTurnChanged(
+		unsigned int anId,
+		unsigned int aBoardId,
+		int aTurnIdx)
+		: MessageGamePlayBase(
+			anId, aBoardId)
+		, turn(aTurnIdx)
+	{
+	}
+
+	int turn;
 };
 
 class MessageSingleMove
@@ -75,15 +147,50 @@ class MessageSingleMove
 {
 public:
 	MessageSingleMove()
-	: MessageGamePlayBase()
+		: MessageGamePlayBase()
 	{
 	}
 
 	MessageSingleMove(
 		unsigned int anId)
-	: MessageGamePlayBase(anId)
+		: MessageGamePlayBase(anId)
 	{
 	}
+
+	MessageSingleMove(
+		unsigned int anId,
+		unsigned int aBoardId)
+		: MessageGamePlayBase(
+			anId, aBoardId)
+	{
+	}
+
+	MessageSingleMove(
+		int thePlayerMark)
+		: MessageGamePlayBase()
+		, mark(thePlayerMark)
+	{
+	}
+
+	MessageSingleMove(
+		unsigned int anId,
+		int thePlayerMark)
+		: MessageGamePlayBase(anId)
+		, mark(thePlayerMark)
+	{
+	}
+
+	MessageSingleMove(
+		unsigned int anId,
+		unsigned int aBoardId,
+		int thePlayerMark)
+		: MessageGamePlayBase(
+			anId, aBoardId)
+		, mark(thePlayerMark)
+	{
+	}
+
+	int mark;
 };
 
 class MessageBlockMove

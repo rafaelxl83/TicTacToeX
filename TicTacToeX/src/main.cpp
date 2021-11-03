@@ -38,6 +38,26 @@ int main()
 	}
 
 	system("CLS");
+
+	std::vector<Point> marked0 =
+	{
+		Point(0,2), Point(0,0),	Point(0,1),
+		Point(2,0), Point(2,2), Point(1,0),
+		Point(1,1), Point(2,1), Point(1,2)
+	};
+	std::vector<Point> marked;
+	std::vector<Point> ignore = { Point(), Point(0,2), Point(2,0), Point(2,2) };
+
+	auto pred = [ignore](Point& p)
+	{
+		return (std::ranges::find(ignore, p) == ignore.end());
+	};
+
+	std::ranges::copy_if(
+		marked0,
+		std::back_inserter(marked),
+		pred
+	);
 	
 
 	Union un2;

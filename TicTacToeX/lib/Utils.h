@@ -54,6 +54,15 @@ struct Point
 		return *this;
 	}
 
+	friend bool operator==(
+		const Point& lp, 
+		const Point& rp)
+	{
+		if (lp.x == rp.x && lp.y == rp.y)
+			return true;
+		return false;
+	}
+
 	friend std::ostream& operator<<(
 		std::ostream& os, 
 		const Point& obj)

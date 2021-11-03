@@ -1,5 +1,7 @@
 #include "Player.h"
 
+#include "../lib/Utils.h"
+
 Player::Player(
 	std::string					aNickName)
 	: Player(

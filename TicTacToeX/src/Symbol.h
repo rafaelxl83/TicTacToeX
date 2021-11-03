@@ -6,7 +6,7 @@ class Symbol
 public:
 	enum class AvailableSymbols : int
 	{
-							empty	= 0,
+							empty	= 255,
 							X		= 1,
 							O		= 3,
 							M		= 6,
@@ -21,11 +21,27 @@ public:
 		int					victory;
 	};
 											Symbol(
+												const Symbol&) = default;
+											Symbol(
 												AvailableSymbols			thePlayerSymbol);
 											Symbol(
-												unsigned short				thePlayerTurn);
+												short						thePlayerTurn);
 
 	SymbolProperty							GetProperty();
+											
+	Symbol& operator=(const Symbol&) = default;
+	bool operator==(const AvailableSymbols& s)
+	{
+		return this->myProperty.symbol == s;
+	}
+	bool operator==(const Symbol& symbol)
+	{
+		return this->myProperty.value == symbol.myProperty.value;
+	}
+	bool operator==(const int& value)
+	{
+		return this->myProperty.value == value;
+	}
 
 	friend std::ostream& operator<<(
 		std::ostream& os,
@@ -49,7 +65,7 @@ private:
 												Union						u, 
 												char						ico);
 
-	SymbolProperty			myProperty;
-
+	SymbolProperty							myProperty;
+	char									AvailableIcons[6] = {' ','X','O','M','S','H'};
 };
 

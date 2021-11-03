@@ -155,6 +155,7 @@
     <ClCompile Include="src\GamePlay.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\Players.cpp" />
     <ClCompile Include="src\Symbol.cpp" />
     <ClCompile Include="src\WorkerCompanion.cpp" />
   </ItemGroup>

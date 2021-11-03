@@ -1,16 +1,16 @@
 #pragma once
-#include "Player.h"
+#include "Board.h"
 #include "GamePlayMessages.h"
 
 #include <mutex>
-#include <map>
+
 
 class GamePlay
 {
 public:
 							GamePlay();
 							GamePlay(
-								std::list<Player>			allPlayers);
+								std::list<Board>			allBoards);
 							~GamePlay();
 
 	virtual void			OnMessageShutdown(
@@ -31,22 +31,33 @@ public:
 	virtual void			Start();
 	virtual void			ShutDown();
 
-	void					AddPlayer(
-								Player*						aPlayer);
-	void					SetPlayers(
-								std::vector<Player>			allPlayers);
+	void					AddBoard(
+								Board*						aBoard);
+	void					SetBoards(
+								std::vector<Board*>			allBoards);
+
+	Board&					GetBoard(
+								int							anIndex);
+	Board&					GetBoard(
+								unsigned int				aBoardId);
 
 	std::string				PrintBoard();
 
-protected:
+//protected:
 	virtual void			Initialize();
 	virtual void			Turn();
+	Symbol					HasWinner(
+								Board&						aBoard);
+	int						CheckSection(
+								Board&						aBoard,
+								Point						aPoint);
+	int						Evaluate(
+								int							aValue);
 
 private:
-	std::vector<Player*>	myPlayers;
+	std::vector<Board*>		myBoards;
 	unsigned int			myPlayersCount;
 	short					myTurnCounter;
 	bool					shutDown = false;
-	std::map<short, Point>	boardMap;
 
 };

@@ -1,38 +1,38 @@
 #include "Symbol.h"
 
 Symbol::Symbol(
-	AvailableSymbols thePlayerSymbol)
+	AvailableSymbols			thePlayerSymbol)
 {
+	Union u;
 	char ico;
 	switch (thePlayerSymbol)
 	{
 	case AvailableSymbols::X:
-		ico = 'X';
+		ico = AvailableIcons[1];
 		break;
 	case AvailableSymbols::O:
-		ico = 'O';
+		ico = AvailableIcons[2];
 		break;
 	case AvailableSymbols::M:
-		ico = 'M';
+		ico = AvailableIcons[3];
 		break;
 	case AvailableSymbols::S:
-		ico = 'S';
+		ico = AvailableIcons[4];
 		break;
 	case AvailableSymbols::H:
-		ico = 'H';
+		ico = AvailableIcons[5];
 		break;
 	default:
-		ico = ' ';
+		ico = AvailableIcons[0];
 		break;
 	}
 
-	Union u;
 	u.s = thePlayerSymbol;
 	SetProperty(u, ico);
 }
 
 Symbol::Symbol(
-	unsigned short thePlayerTurn)
+	short						thePlayerTurn)
 {
 	Union u;
 	char ico;
@@ -40,27 +40,27 @@ Symbol::Symbol(
 	{
 	case 1:
 		u.s = AvailableSymbols::X;
-		ico = 'X';
+		ico = AvailableIcons[1];
 		break;
 	case 2:
 		u.s = AvailableSymbols::O;
-		ico = 'O';
+		ico = AvailableIcons[2];
 		break;
 	case 3:
 		u.s = AvailableSymbols::M;
-		ico = 'M';
+		ico = AvailableIcons[3];
 		break;
 	case 4:
 		u.s = AvailableSymbols::S;
-		ico = 'S';
+		ico = AvailableIcons[4];
 		break;
 	case 5:
 		u.s = AvailableSymbols::H;
-		ico = 'H';
+		ico = AvailableIcons[5];
 		break;
 	default:
 		u.s = AvailableSymbols::empty;
-		ico = ' ';
+		ico = AvailableIcons[0];
 		break;
 	}
 
@@ -75,11 +75,11 @@ Symbol::GetProperty()
 
 void 
 Symbol::SetProperty(
-	Union u, 
-	char ico)
+	Union						u, 
+	char						ico)
 {
-	myProperty.ico = ico;
-	myProperty.symbol = u.s;
-	myProperty.value = u.i;
-	myProperty.victory = 3 * u.i;
+	myProperty.ico		 = ico;
+	myProperty.symbol	 = u.s;
+	myProperty.value	 = u.i;
+	myProperty.victory	 = 3 * u.i;
 }

@@ -14,6 +14,7 @@
 #include "..\TicTacToeX\src\EventTable.h"
 #include "..\TicTacToeX\src\Board.h"
 #include "..\TicTacToeX\src\Player.h"
+#include "..\TicTacToeX\src\GamePlay.h"
 #pragma endregion
 
 #define TEST_DEFAULT_ID					static_cast<unsigned int>(GetHashID(GenKey("TEST")))
@@ -158,9 +159,9 @@ namespace TTTXTestSuit
 				std::stringbuf buffer;
 				std::ostream os(&buffer);
 
-				line.insert(0, 15, '_');
+				line.insert(0, 15, '-');
 				line[4] = '|';
-				line[7] = '|';
+				line[9] = '|';
 
 				for (int i = 0; i < 3; i++)
 				{
@@ -809,7 +810,17 @@ namespace TTTXTestSuit
 				GetHashID(board_id),
 				emu->evt.GetID());
 
+			std::stringbuf buffer;
+			std::ostream os(&buffer);
+			board->PrintBoard(os);
+
+			std::string s = buffer.str();
+
 			emu->Emulate3PlayersBoardActions(board);
+
+			buffer.str("");
+			board->PrintBoard(os);
+			s = buffer.str();
 
 			std::weak_ptr<Row[]> aSection = board->GetSector(Point(1,1));
 			std::string str = emu->Board3x3ToStr(aSection.lock(), (char*)"|", true);
@@ -873,7 +884,7 @@ namespace TTTXTestSuit
 
 			player = new Player(
 				emu->p1ID,
-				"Momo2017",
+				"Momo20171109",
 				Symbol(Symbol::AvailableSymbols::X),
 				input);
 
@@ -909,6 +920,186 @@ namespace TTTXTestSuit
 			player->RemBoard(bIDs[3]);
 
 			Assert::AreEqual((int)player->GetAllBoards().size(), 3);
+		}
+#pragma endregion
+	};
+#pragma endregion
+
+#pragma region "GamePlay Unit Test"
+	TEST_CLASS(GamePlayUnitTest)
+	{
+	public:
+		std::shared_ptr<Helper::GameBase4Test> emu;
+		GamePlay* gplay;
+		Player* player1;
+		Player* player2;
+		Player* player3;
+		Board* board;
+		EventTable evt;
+
+		unsigned int player1ID;
+		unsigned int player2ID;
+		unsigned int player3ID;
+		unsigned int boardID;
+		unsigned int evtID;
+
+#pragma region "Initialize and cleanup tests"
+		TEST_METHOD_INITIALIZE(Startup)
+		{
+			// method initialization code
+			emu = std::make_shared<Helper::GameBase4Test>(Helper::GameBase4Test());
+			player1ID = GetHashID(GenKey("PLAYER1"));
+			player2ID = GetHashID(GenKey("PLAYER2"));
+			player3ID = GetHashID(GenKey("PLAYER3"));
+			boardID = GetHashID(GenKey("BOARD"));
+			evtID = GetHashID(GenKey("EVT"));
+		}
+
+		TEST_METHOD_CLEANUP(End)
+		{
+			// test method cleanup  code
+		}
+#pragma endregion
+
+#pragma region "Unit Tests"
+		TEST_METHOD(EvaluateTest)
+		{
+			gplay = new GamePlay();
+
+			int victory = 0;
+			Assert::AreEqual(gplay->Evaluate(victory), 0);
+
+			victory = (int)Symbol::AvailableSymbols::X * 3;
+			Assert::AreEqual(gplay->Evaluate(victory), 1);
+
+			victory = (int)Symbol::AvailableSymbols::O * 3;
+			Assert::AreEqual(gplay->Evaluate(victory), 2);
+
+			victory = (int)Symbol::AvailableSymbols::M * 3;
+			Assert::AreEqual(gplay->Evaluate(victory), 3);
+
+			victory = (int)Symbol::AvailableSymbols::S * 3;
+			Assert::AreEqual(gplay->Evaluate(victory), 4);
+
+			victory = (int)Symbol::AvailableSymbols::H * 3;
+			Assert::AreEqual(gplay->Evaluate(victory), 5);
+
+			victory = 200;
+			Assert::AreEqual(gplay->Evaluate(victory), 0);
+		}
+
+		TEST_METHOD(CheckSection2PD1WinnerTest)
+		{
+			int winner = 0;
+			gplay = new GamePlay();
+			board = new Board(emu->evtID);
+			
+			emu->Emulate2PlayersBoardActions(board);
+
+			for (Point p : board->GetMarkedPositions())
+			{
+				winner = gplay->CheckSection(*board, p);
+				if (winner != 0)
+					break;
+			}
+			Assert::AreEqual(winner, 1);
+		}
+
+		TEST_METHOD(CheckSection3PD2WinnerTest)
+		{
+			int winner = 0;
+			Point winnerPoint;
+			gplay = new GamePlay();
+			board = new Board(
+				BoardSizes::ThreePlayers,
+				boardID, emu->evt.GetID());
+
+			emu->Emulate3PlayersBoardActions(board);
+			for (Point p : board->GetMarkedPositions())
+			{
+				winner = gplay->CheckSection(*board, p);
+				if (winner != 0)
+				{
+					winnerPoint = p;
+					break;
+				}
+			}
+
+			std::weak_ptr<Row[]> aSection = board->GetSector(winnerPoint);
+			std::string str = emu->Board3x3ToStr(aSection.lock(), (char*)"|", true);
+			TEST_OUTPUT(L"CheckSection3PD2WinnerTest: \n%s",
+				Helper::mbs2wcs((char*)str.c_str()));
+
+			Assert::AreEqual(winner, 3);
+		}
+
+		TEST_METHOD(PlaythroughTest)
+		{
+			Symbol winner = 0;
+			int index = 0;
+
+			std::stringbuf buffer;
+			std::iostream input(&buffer);
+
+			gplay = new GamePlay();
+			gplay->AddBoard(
+				new Board(
+					boardID,
+					emu->evtID));
+
+			player1 = new Player(
+				player1ID,
+				"PLAYER1",
+				Symbol(Symbol::AvailableSymbols::empty),
+				input);
+
+			player2 = new Player(
+				player2ID,
+				"PLAYER2",
+				Symbol(Symbol::AvailableSymbols::empty),
+				input);
+			
+			player1->SetSymbol(Symbol(1));
+			player2->SetSymbol(Symbol(2));
+
+			player1->SetState(Player::PlayerState::Turn);
+
+			//board = &gplay->GetBoard(0);
+			board = &gplay->GetBoard(boardID);
+
+			if (board->GetID() == boardID)
+			{
+				do
+				{
+					index = Random(1, 9);
+
+					if (player1->GetState() == Player::PlayerState::Turn)
+					{
+						if (board->SetMark((short)index, player1->GetPlayerSymbol()))
+						{
+							player1->SetState(Player::PlayerState::Idle);
+							player2->SetState(Player::PlayerState::Turn);
+						}
+					}
+					else
+					{
+						if (board->SetMark((short)index, player2->GetPlayerSymbol()))
+						{
+							player2->SetState(Player::PlayerState::Idle);
+							player1->SetState(Player::PlayerState::Turn);
+						}
+					}
+
+					winner = gplay->HasWinner(*board);
+				} while (winner == Symbol::AvailableSymbols::empty && !board->IsFull());
+
+				std::string str = emu->Board3x3ToStr(
+					board->GetSector(Point(1, 1)).lock(), (char*)"|", true);
+				TEST_OUTPUT(L"PlaythroughTest: %c - \n%s", winner.GetProperty().ico,
+					Helper::mbs2wcs((char*)str.c_str()));
+			}
+
+			Assert::AreEqual(board->GetID(), boardID);
 		}
 #pragma endregion
 	};

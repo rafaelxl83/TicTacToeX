@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../lib/Utils.h"
 #include "EventTable.h"
+
+#include <map>
 
 #define VERIFICATION_ADJUSTMENT 2
 
@@ -18,6 +19,11 @@ typedef std::vector<Symbol> Row;
 class Board
 {
 public:
+										Board(							) = delete;
+										Board(
+											Board&&						) = default;
+										Board(
+											const Board&				) = delete;
 										Board(
 											unsigned int				anEvtTableId);
 										Board(
@@ -27,8 +33,9 @@ public:
 											BoardSizes					theSize,
 											unsigned int				anId,
 											unsigned int				anEvtTableId);
-										~Board();
+										~Board() = default;
 
+	short								GetSize();
 	unsigned int						GetID();
 	unsigned int						GetEvtTableID();
 	std::weak_ptr<Row[]>				GetSector(
@@ -38,28 +45,34 @@ public:
 	bool								SetMark(
 											Point						aPos,
 											Symbol						aSymbol);
+	bool								SetMark(
+											short						aPos,
+											Symbol						aSymbol);
 
 	bool								IsFull();
 
+	void								PrintBoard(
+											std::ostream&				aStream);
+
 	std::string							ToString() const;
-	
+
+	/*Board&								operator= (
+											const Board&				) = delete;
+	Board&								operator= (
+											Board&						) = default;*/
 protected:
-	void Initialize();
+	void								Initialize();
 
 private:
-	union Union
-	{
-		BoardSizes	s;
-		short		i;
-	};
-
 	unsigned int						myId;
 	short								mySize;
 	short								realSize;
+	short								cellsAmount;
 	unsigned int						myEvtTableId;
 
 	std::shared_ptr<Row[]>				theSection;
 	std::unique_ptr<Row[]>				theBoard;
+	std::map<short, Point>				boardMap;
 
 	std::vector<Point>					markedCells;
 };
