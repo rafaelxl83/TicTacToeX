@@ -3,6 +3,9 @@
 
 #include <numeric>
 #include <chrono>
+#include <iostream>
+#include <string>
+#include <sstream>
 
 
 #define private public
@@ -135,7 +138,7 @@ namespace TTTXTestSuit
 				timestamp = std::chrono::system_clock::now().time_since_epoch().count();
 				sprintf_s(tmp_id, "BOARD%.lf", timestamp);
 				boardID = GetHashID(tmp_id);
-				board = new Board(boardID, evtID);
+				board = new Board(boardID);
 
 				timestamp = std::chrono::system_clock::now().time_since_epoch().count();
 				sprintf_s(player_id, "PLAYERID%.lf", timestamp);
@@ -254,6 +257,15 @@ namespace TTTXTestSuit
 				evt.RegisterEvent(p1ID, *s1, pos1);
 				pos2.x = 3; pos2.y = 3;
 				evt.RegisterEvent(p2ID, *s2, pos2);
+			}
+
+			unsigned int EmulatePlayerEntry(Player& p, std::iostream& in, int value)
+			{
+				in << value;
+				int move = p.MakeAMove();
+				in.get();
+				in.clear();
+				return move;
 			}
 #pragma endregion
 
@@ -511,6 +523,16 @@ namespace TTTXTestSuit
 			TEST_OUTPUT(L"Symbol H: symbol H [%c]", s.GetProperty().symbol);
 			Assert::AreEqual(s.GetProperty().ico, 'H');
 		}
+
+		TEST_METHOD(SymbolCasting)
+		{
+			Symbol s(Symbol::AvailableSymbols::O);
+			Symbol symbol = (Symbol::AvailableSymbols)3;
+
+			TEST_OUTPUT(L"Symbol Casting: symbol O [%c]", s.GetProperty().symbol);
+			Assert::AreEqual(s.GetProperty().value, symbol.GetProperty().value);
+		}
+		
 #pragma endregion
 	
 	};
@@ -758,13 +780,27 @@ namespace TTTXTestSuit
 #pragma region "Unit Tests"
 		TEST_METHOD(DefaultBoardTest)
 		{
-			board = new Board(emu->evt.GetID());
+			board = new Board(GetHashID(board_id));
 			Assert::AreEqual((int)board->theBoard.get()->size(), 7);
+		}
+
+		TEST_METHOD(BoardPointTest)
+		{
+			board = new Board(GetHashID(board_id));
+			bool isNull = false;
+
+			std::optional<Point> p = board->GetPoint(2);
+			p = board->GetPoint(30);
+
+			if (!p.has_value())
+				isNull = true;
+
+			Assert::AreEqual(isNull, true);
 		}
 
 		TEST_METHOD(BoardTestMark)
 		{
-			board = new Board(emu->evt.GetID());
+			board = new Board(GetHashID(board_id));
 			emu->Emulate1PlayerBoardActions(board);
 
 			bool markSucceeded = board->SetMark(
@@ -776,7 +812,7 @@ namespace TTTXTestSuit
 
 		TEST_METHOD(BoardTestTwoPlayers)
 		{
-			board = new Board(GetHashID(board_id), emu->evt.GetID());
+			board = new Board(GetHashID(board_id));
 
 			bool completed = board->IsFull();
 
@@ -791,8 +827,7 @@ namespace TTTXTestSuit
 		{
 			board = new Board(
 				BoardSizes::ThreePlayers,
-				GetHashID(board_id),
-				emu->evt.GetID());
+				GetHashID(board_id));
 
 			emu->Emulate3PlayersBoardActions(board);
 
@@ -800,15 +835,14 @@ namespace TTTXTestSuit
 
 			std::string str = emu->Board3x3ToStr(aSection.lock(), (char*)"", false);
 
-			Assert::AreEqual(str.c_str(), " [0] [0] [0] [0]X[1]O[3] [0]O[3]M[6]");
+			Assert::AreEqual(str.c_str(), " [255] [255] [255] [255]X[1]O[3] [255]O[3]M[6]");
 		}
 
 		TEST_METHOD(BoardTestSectionDiagonal)
 		{
 			board = new Board(
 				BoardSizes::ThreePlayers,
-				GetHashID(board_id),
-				emu->evt.GetID());
+				GetHashID(board_id));
 
 			std::stringbuf buffer;
 			std::ostream os(&buffer);
@@ -835,7 +869,7 @@ namespace TTTXTestSuit
 			aSection = board->GetSector(Point(3, 3));
 			str = emu->Board3x3ToStr(aSection.lock(), (char*)"", false);
 
-			Assert::AreEqual(str.c_str(), "O[3]M[6] [0]M[6]X[1] [0] [0] [0] [0]");
+			Assert::AreEqual(str.c_str(), "O[3]M[6] [255]M[6]X[1] [255] [255] [255] [255]");
 		}
 #pragma endregion
 	};
@@ -880,7 +914,6 @@ namespace TTTXTestSuit
 		{
 			std::stringbuf buffer;
 			std::iostream input(&buffer);
-			input << 1;
 
 			player = new Player(
 				emu->p1ID,
@@ -890,10 +923,10 @@ namespace TTTXTestSuit
 
 			player->AddBoardId(emu->boardID);
 
-			unsigned int move = 0;
+			unsigned int move = 0, t = 6;
 			do
 			{
-				move = player->MakeAMove();
+				move = emu->EmulatePlayerEntry(*player, input, t--);
 				player->SetState(Player::PlayerState::Turn);
 			} while (move != 1);
 
@@ -992,7 +1025,7 @@ namespace TTTXTestSuit
 		{
 			int winner = 0;
 			gplay = new GamePlay();
-			board = new Board(emu->evtID);
+			board = new Board(boardID);
 			
 			emu->Emulate2PlayersBoardActions(board);
 
@@ -1012,7 +1045,7 @@ namespace TTTXTestSuit
 			gplay = new GamePlay();
 			board = new Board(
 				BoardSizes::ThreePlayers,
-				boardID, emu->evt.GetID());
+				boardID);
 
 			emu->Emulate3PlayersBoardActions(board);
 			for (Point p : board->GetMarkedPositions())
@@ -1043,9 +1076,7 @@ namespace TTTXTestSuit
 
 			gplay = new GamePlay();
 			gplay->AddBoard(
-				new Board(
-					boardID,
-					emu->evtID));
+				new Board(boardID));
 
 			player1 = new Player(
 				player1ID,
@@ -1064,11 +1095,12 @@ namespace TTTXTestSuit
 
 			player1->SetState(Player::PlayerState::Turn);
 
-			//board = &gplay->GetBoard(0);
-			board = &gplay->GetBoard(boardID);
+			//std::optional<Board*> b = gplay->GetBoard(0);
+			std::optional<Board*> b = gplay->GetBoard(boardID);
 
-			if (board->GetID() == boardID)
+			if (b.has_value())
 			{
+				board = b.value();
 				do
 				{
 					index = Random(1, 9);

@@ -1,9 +1,9 @@
+#include "EventTable.h"
+#include "ExceptionHelper.h"
+
 #include <chrono>
 #include <ranges>
 
-
-#include "Board.h"
-#include "ExceptionHelper.h"
 
 EventTable::EventTable()
 	: EventTable(EVT_DEFAULT_ID)

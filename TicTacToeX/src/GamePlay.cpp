@@ -4,20 +4,6 @@
 
 #include "ExceptionHelper.h"
 
-GamePlay::GamePlay()
-{
-
-}
-GamePlay::GamePlay(
-	std::list<Board>				allBoards)
-{
-
-}
-GamePlay::~GamePlay()
-{
-
-}
-
 #pragma region "Message Events"
 void
 GamePlay::OnMessageEndOfGame(
@@ -25,6 +11,15 @@ GamePlay::OnMessageEndOfGame(
 {
 	try
 	{
+		if (aMessage.callerId != myId)
+			return;
+
+		// notify the players about the end
+		// and send the winner if there are
+		// one
+		SEND_TO_PLAYERS(MessageEndOfGame(
+			aMessage.callerId,
+			aMessage.theWinner));
 	}
 	catch (std::system_error& ex)
 	{
@@ -33,11 +28,24 @@ GamePlay::OnMessageEndOfGame(
 }
 void
 GamePlay::OnMessageStartOfGame(
-	const MessageStartOfGame&		/*aMessage*/) noexcept
+	const MessageStartOfGame&		aMessage) noexcept
 {
 	try
 	{
-		SEND_TO_GAMEPLAY(MessageTurnChanged());
+		if (aMessage.callerId != myId)
+			return;
+
+		std::optional<Board*> b = GetBoard(0);
+		if (!b.has_value())
+		{
+			Log("[GamePlay]", "OnMessageStartOfGame",
+				"FATAL", "There are no boards to play!");
+			return;
+		}
+
+		SEND_TO_GAMEPLAY(MessageTurnChanged(
+			aMessage.callerId,
+			b.value()->GetID()));
 	}
 	catch (std::system_error& ex)
 	{
@@ -50,10 +58,51 @@ GamePlay::OnMessageTurnChanged(
 {
 	try
 	{
+		if (aMessage.callerId != myId)
+			return;
+
+		// cyclic event to manage the playthrough
 		if (!shutDown)
 		{
-			Turn();
-			SEND_TO_PLAYERS(MessageSingleMove());
+			std::optional<Board*> b = GetBoard(aMessage.myBoardId);
+			if (!b.has_value())
+			{
+				Log("[GamePlay]", "OnMessageTurnChanged",
+					"ERROR", "Board not found!");
+				return;
+			}
+
+			// check if there are a winner
+			theWinner = HasWinner(*b.value());
+
+			// If exist a winner, compute the victory ponts
+			// and call the end of the game for this board
+			if (theWinner != Symbol::AvailableSymbols::empty)
+			{
+				SEND_TO_GAMEPLAY(MessageScorePoints(
+					aMessage.callerId,
+					aMessage.myPlayerId,
+					aMessage.myBoardId,
+					(int)ScorePoints::WINNER,
+					(int)theWinner.GetProperty().symbol));
+			}
+
+			// No winner, check if this board is full and
+			// keep running the playthrough
+			else if(!b.value()->IsFull())
+				SEND_TO_GAMEPLAY(MessageTurnChanged(
+					aMessage.callerId,
+					aMessage.myBoardId,
+					myTurnCounter));
+
+			// the board is full, no winners, so
+			// it is the end of the playthrough
+			// for this board
+			else
+				SEND_TO_GAMEPLAY(MessageEndOfGame(
+					aMessage.callerId,
+					aMessage.myBoardId,
+					(int)Symbol::AvailableSymbols::empty));
 		}
 	}
 	catch (std::system_error& ex)
@@ -67,9 +116,61 @@ GamePlay::OnMessageSingleMove(
 {
 	try
 	{
+		if (aMessage.callerId != myId)
+			return;
+
+		// must check if the movment is valid
+		// and mark it into the correct board
+		// if it's not a valid marked position
+		// should notify the players about
+		// this invalid movment and waint to
+		// a new entry from the player
 		if (!shutDown)
 		{
-			
+			std::optional<Board*> b = GetBoard(aMessage.myBoardId);
+			if (!b.has_value())
+			{
+				Log("[GamePlay]", "OnMessageSingleMove", 
+					"ERROR", "Board not found!");
+				return;
+			}
+
+			bool marked = false;
+			std::optional<Point> p = b.value()->GetPoint(aMessage.mark);
+			if (p.has_value())
+			{
+				Symbol s = (Symbol::AvailableSymbols)aMessage.symbol;
+
+				std::optional<EventTable*> e = GetEvtTable(aMessage.myBoardId);
+				if (e.has_value())
+					e.value()->RegisterEvent(aMessage.myPlayerId, s, p.value());
+				else
+					Log("[GamePlay]", "OnMessageSingleMove",
+						"WARNNING", "No event table found for this board");
+
+				marked = b.value()->SetMark(p.value(), s);
+			}
+			else
+				Log("[GamePlay]", "OnMessageSingleMove",
+					"ERROR", "Invalid position for this board");
+
+			if(marked)
+			{
+				Turn();
+				// get the next player input
+				SEND_TO_PLAYERS(MessageTurnChanged(
+					aMessage.callerId, 1));
+			}
+			else
+				// get the same player input
+				SEND_TO_PLAYERS(MessageTurnChanged(
+					aMessage.callerId, 0));
+
+			SEND_TO_GAMEPLAY(MessageTurnChanged(
+				aMessage.callerId,
+				aMessage.myPlayerId,
+				aMessage.myBoardId,
+				myTurnCounter));
 		}
 	}
 	catch (std::system_error& ex)
@@ -83,6 +184,9 @@ GamePlay::OnMessageBlockMove(
 {
 	try
 	{
+		if (aMessage.callerId != myId)
+			return;
+
 	}
 	catch (std::system_error& ex)
 	{
@@ -95,6 +199,9 @@ GamePlay::OnMessageScorePoints(
 {
 	try
 	{
+		if (aMessage.callerId != myId)
+			return;
+
 	}
 	catch (std::system_error& ex)
 	{
@@ -108,6 +215,9 @@ GamePlay::OnMessageShutdown(
 {
 	try
 	{
+		if (aMessage.callerId != myId)
+			return;
+
 		ShutDown();
 	}
 	catch (std::system_error& ex)
@@ -117,21 +227,60 @@ GamePlay::OnMessageShutdown(
 }
 #pragma endregion
 
+#pragma region "Commom methods"
+GamePlay::GamePlay()
+	: GamePlay(
+		GPLAY_DEFAULT_ID,
+		std::vector<Board*>())
+{
+
+}
+GamePlay::GamePlay(
+	const unsigned int			anId)
+	: GamePlay(
+		anId,
+		std::vector<Board*>())
+{
+
+}
+GamePlay::GamePlay(
+	std::vector<Board*>				allBoards)
+	: GamePlay(
+		GPLAY_DEFAULT_ID,
+		allBoards)
+{
+
+}
+GamePlay::GamePlay(
+	const unsigned int			anId,
+	std::vector<Board*>				allBoards)
+	: myId(anId)
+	, myPlayersCount(0)
+	, myTurnCounter(0)
+	, theWinner(0)
+{
+	this->AddBoards(allBoards);
+}
+GamePlay::~GamePlay()
+{
+
+}
+
 void
 GamePlay::Start()
 {
-	REGISTER_BOARD(MessageShutdown,			GamePlay::OnMessageShutdown);
-	REGISTER_BOARD(MessageEndOfGame,		GamePlay::OnMessageEndOfGame);
-	REGISTER_BOARD(MessageStartOfGame,		GamePlay::OnMessageStartOfGame);
-	REGISTER_BOARD(MessageTurnChanged,		GamePlay::OnMessageTurnChanged);
-	REGISTER_BOARD(MessageSingleMove,		GamePlay::OnMessageSingleMove);
-	REGISTER_BOARD(MessageBlockMove,		GamePlay::OnMessageBlockMove);
-	REGISTER_BOARD(MessageScorePoints,		GamePlay::OnMessageScorePoints);
+	REGISTER_BOARD(MessageShutdown,			GamePlay::OnMessageShutdown		);
+	REGISTER_BOARD(MessageEndOfGame,		GamePlay::OnMessageEndOfGame	);
+	REGISTER_BOARD(MessageStartOfGame,		GamePlay::OnMessageStartOfGame	);
+	REGISTER_BOARD(MessageTurnChanged,		GamePlay::OnMessageTurnChanged	);
+	REGISTER_BOARD(MessageSingleMove,		GamePlay::OnMessageSingleMove	);
+	REGISTER_BOARD(MessageBlockMove,		GamePlay::OnMessageBlockMove	);
+	REGISTER_BOARD(MessageScorePoints,		GamePlay::OnMessageScorePoints	);
 
 	Initialize();
 
-	SEND_TO_GAMEPLAY(MessageStartOfGame());
-	SEND_TO_PLAYERS(MessageStartOfGame());
+	SEND_TO_GAMEPLAY(MessageStartOfGame(myId));
+	SEND_TO_PLAYERS(MessageStartOfGame(myId));
 }
 
 void
@@ -141,57 +290,8 @@ GamePlay::ShutDown()
 }
 
 void
-GamePlay::AddBoard(
-	Board*						aBoard)
-{
-	myBoards.push_back(aBoard);
-}
-void
-GamePlay::SetBoards(
-	std::vector<Board*>			allBoards)
-{
-	//myBoards = std::move(allBoards); //old method
-	std::ranges::move(allBoards, std::back_inserter(myBoards));
-}
-
-Board& 
-GamePlay::GetBoard(
-	int							anIndex)
-{
-	return *myBoards[anIndex];
-}
-Board&
-GamePlay::GetBoard(
-	unsigned int				aBoardId)
-{
-	auto board = std::ranges::find_if(
-		myBoards,
-		[aBoardId](Board* b) { return (b->GetID() == aBoardId); });
-
-	if (board != myBoards.end())
-		return **board;
-
-	return *myBoards[0];
-}
-
-std::string
-GamePlay::PrintBoard()
-{
-	
-	return "";
-}
-
-void
 GamePlay::Initialize()
 {
-	for (auto b : myBoards)
-	{
-		if ((int)BoardSizes::TwoPlayers > b->GetSize() || b->GetSize() > (int)BoardSizes::FivePlayers)
-		{
-			throw std::exception(
-				"Invalid number of players, must be between 2 and 5 players.");
-		}
-	}
 
 }
 
@@ -200,7 +300,142 @@ GamePlay::Turn()
 {
 
 }
+#pragma endregion
 
+#pragma region "Board methods"
+void
+GamePlay::AddBoard(
+	Board*						aBoard)
+{
+	myBoards.push_back(aBoard);
+	myEvtTables.push_back(new EventTable(aBoard->GetID()));
+}
+void
+GamePlay::AddBoards(
+	std::vector<Board*>			allBoards)
+{
+	if (allBoards.size() <= 0) return;
+
+	//myBoards = std::move(allBoards); //old method
+	std::ranges::move(allBoards, std::back_inserter(myBoards));
+	for (auto b : myBoards)
+		myEvtTables.push_back(new EventTable(b->GetID()));
+}
+
+std::optional<Board*>
+GamePlay::GetBoard(
+	int							anIndex)
+{
+	return std::make_optional(myBoards[anIndex]);
+}
+std::optional<Board*>
+GamePlay::GetBoard(
+	unsigned int				aBoardId)
+{
+	auto board = std::ranges::find_if(
+		myBoards,
+		[aBoardId](Board* b) { return (b->GetID() == aBoardId); });
+
+	if (board != myBoards.end())
+		return std::make_optional(*board);
+
+	return std::nullopt;
+}
+std::vector<Board*>
+GamePlay::GetAllBoards()
+{
+	return myBoards;
+}
+
+std::string
+GamePlay::PrintBoard(
+	int							anIndex)
+{
+	std::stringbuf buffer;
+	std::ostream os(&buffer);
+
+	std::optional<Board*> board = GetBoard(anIndex);
+	if (board.has_value())
+		board.value()->PrintBoard(os);
+	else
+		os << "NO BOARD FOUND!";
+
+	return buffer.str();
+}
+std::string
+GamePlay::PrintBoard(
+	unsigned int				aBoardId)
+{
+	std::stringbuf buffer;
+	std::ostream os(&buffer);
+
+	std::optional<Board*> board = GetBoard(aBoardId);
+	if (board.has_value())
+		board.value()->PrintBoard(os);
+	else
+		os << "NO BOARD FOUND!";
+
+	return buffer.str();
+}
+
+bool
+GamePlay::SetMark(
+	int							anIndex,
+	short						aPos,
+	Symbol						aSymbol)
+{
+	bool success = false;
+	std::optional<Board*> board = GetBoard(anIndex);
+
+	if (board.has_value())
+		success = board.value()->SetMark(aPos, aSymbol);
+
+	return success;
+}
+bool
+GamePlay::SetMark(
+	unsigned int				aBoardId,
+	short						aPos,
+	Symbol						aSymbol)
+{
+	bool success = false;
+	std::optional<Board*> board = GetBoard(aBoardId);
+
+	if (board.has_value())
+		success = board.value()->SetMark(aPos, aSymbol);
+
+	return false;
+}
+#pragma endregion
+
+#pragma region "Event Table methods"
+std::optional<EventTable*>
+GamePlay::GetEvtTable(
+	int							anIndex)
+{
+	return std::make_optional(myEvtTables[anIndex]);
+}
+std::optional<EventTable*>
+GamePlay::GetEvtTable(
+	unsigned int				aTableId)
+{
+	auto table = std::ranges::find_if(
+		myEvtTables,
+		[aTableId](EventTable* t) { return (t->GetID() == aTableId); });
+
+	if (table != myEvtTables.end())
+		return std::make_optional(*table);
+
+	return std::nullopt;
+}
+std::vector<EventTable*>
+GamePlay::GetAllEvtTables()
+{
+	return myEvtTables;
+}
+#pragma endregion
+
+#pragma region "GamePlay Validation"
 Symbol
 GamePlay::HasWinner(
 	Board&						aBoard)
@@ -327,3 +562,4 @@ GamePlay::Evaluate(
 			return 0;
 	}
 }
+#pragma endregion

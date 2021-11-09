@@ -1,9 +1,5 @@
 #include "Board.h"
-
-#include "../lib/Utils.h"
-#include "../lib/MessageBus.h"
 #include "ExceptionHelper.h"
-#include "GamePlayMessages.h"
 
 #include <cassert>
 #include <algorithm>
@@ -11,30 +7,17 @@
 #include <sstream>
 
 Board::Board(
-	unsigned int 				anEvtTableId)
+	unsigned int 				anId)
 	: Board(
 		BoardSizes::TwoPlayers,
-		BOARD_DEFAULT_ID,
-		anEvtTableId)
-{
-}
-
-Board::Board(
-	unsigned int				anId,
-	unsigned int 				anEvtTableId)
-	: Board(
-		BoardSizes::TwoPlayers,
-		anId,
-		anEvtTableId)
+		anId)
 {
 }
 
 Board::Board(
 	BoardSizes					theSize,
-	unsigned int				anId,
-	unsigned int 				anEvtTableId)
+	unsigned int				anId)
 	: myId(anId)
-	, myEvtTableId(anEvtTableId)
 {
 	mySize = (short)theSize;
 	realSize = mySize + 2 * VERIFICATION_ADJUSTMENT;
@@ -57,10 +40,14 @@ Board::GetID()
 	return myId;
 }
 
-unsigned int
-Board::GetEvtTableID()
+std::optional<Point>
+Board::GetPoint(
+	short						aPos)
 {
-	return myEvtTableId;
+	if (1 <= aPos && aPos <= cellsAmount)
+		return boardMap.at(aPos);
+
+	return std::nullopt;
 }
 
 std::weak_ptr<Row[]>

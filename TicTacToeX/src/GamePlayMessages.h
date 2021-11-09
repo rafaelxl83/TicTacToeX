@@ -58,6 +58,14 @@ public:
 	}
 
 	MessageEndOfGame(
+		unsigned int anId,
+		int aWinner)
+		: MessageGamePlayBase(anId)
+		, theWinner(aWinner)
+	{
+	}
+
+	MessageEndOfGame(
 		unsigned int aPlayerId,
 		unsigned int aBoardId)
 		: MessageGamePlayBase(
@@ -67,12 +75,15 @@ public:
 
 	MessageEndOfGame(
 		unsigned int anId,
-		unsigned int aPlayerId,
-		unsigned int aBoardId)
-	: MessageGamePlayBase(
-		anId, aPlayerId, aBoardId)
+		unsigned int aBoardId,
+		int aWinner)
+		: MessageGamePlayBase(
+			anId, aBoardId)
+		, theWinner(aWinner)
 	{
 	}
+
+	int theWinner = 0;
 };
 
 class MessageStartOfGame
@@ -139,6 +150,17 @@ public:
 	{
 	}
 
+	MessageTurnChanged(
+		unsigned int anId,
+		unsigned int aPlayerId,
+		unsigned int aBoardId,
+		int aTurnIdx)
+		: MessageGamePlayBase(
+			anId, aPlayerId, aBoardId)
+		, turn(aTurnIdx)
+	{
+	}
+
 	int turn;
 };
 
@@ -166,31 +188,87 @@ public:
 	}
 
 	MessageSingleMove(
-		int thePlayerMark)
+		int thePlayerMark,
+		int theSymbol)
 		: MessageGamePlayBase()
 		, mark(thePlayerMark)
+		, symbol(theSymbol)
 	{
 	}
 
 	MessageSingleMove(
 		unsigned int anId,
-		int thePlayerMark)
+		int thePlayerMark,
+		int theSymbol)
 		: MessageGamePlayBase(anId)
 		, mark(thePlayerMark)
+		, symbol(theSymbol)
 	{
 	}
 
 	MessageSingleMove(
 		unsigned int anId,
 		unsigned int aBoardId,
-		int thePlayerMark)
+		int thePlayerMark,
+		int theSymbol)
 		: MessageGamePlayBase(
 			anId, aBoardId)
 		, mark(thePlayerMark)
+		, symbol(theSymbol)
+	{
+	}
+
+	MessageSingleMove(
+		unsigned int anId,
+		unsigned int aPlayerId,
+		unsigned int aBoardId,
+		int thePlayerMark,
+		int theSymbol)
+		: MessageGamePlayBase(
+			anId, aPlayerId, aBoardId)
+		, mark(thePlayerMark)
+		, symbol(theSymbol)
 	{
 	}
 
 	int mark;
+	int symbol;
+};
+
+class MessageScorePoints
+	: public MessageGamePlayBase
+{
+public:
+	MessageScorePoints()
+		: MessageGamePlayBase()
+	{
+	}
+
+	MessageScorePoints(
+		unsigned int anId,
+		int thePoints,
+		int theSymbol)
+		: MessageGamePlayBase(anId)
+		, points(thePoints)
+		, symbol(theSymbol)
+	{
+	}
+
+	MessageScorePoints(
+		unsigned int anId,
+		unsigned int aPlayerId,
+		unsigned int aBoardId,
+		int thePoints,
+		int theSymbol)
+		: MessageGamePlayBase(
+			anId, aPlayerId, aBoardId)
+		, points(thePoints)
+		, symbol(theSymbol)
+	{
+	}
+
+	int points;
+	int symbol;
 };
 
 class MessageBlockMove
@@ -203,22 +281,6 @@ public:
 	}
 
 	MessageBlockMove(
-		unsigned int anId)
-	: MessageGamePlayBase(anId)
-	{
-	}
-};
-
-class MessageScorePoints
-	: public MessageGamePlayBase
-{
-public:
-	MessageScorePoints()
-	: MessageGamePlayBase()
-	{
-	}
-
-	MessageScorePoints(
 		unsigned int anId)
 	: MessageGamePlayBase(anId)
 	{

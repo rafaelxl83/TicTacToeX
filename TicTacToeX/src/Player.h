@@ -74,3 +74,4 @@ private:
 #else
 #define PLAYER_DEFAULT_ID				static_cast<unsigned int>(GetHashID(GenKey("PLAYER")))
 #endif
+#define NO_MARK							0

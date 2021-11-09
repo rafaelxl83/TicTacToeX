@@ -1,8 +1,11 @@
 #pragma once
 
-#include "EventTable.h"
+#include "Symbol.h"
+#include "../lib/Utils.h"
 
 #include <map>
+#include <vector>
+#include <optional>
 
 #define VERIFICATION_ADJUSTMENT 2
 
@@ -25,19 +28,16 @@ public:
 										Board(
 											const Board&				) = delete;
 										Board(
-											unsigned int				anEvtTableId);
-										Board(
-											unsigned int				anId,
-											unsigned int				anEvtTableId);
+											unsigned int				anId);
 										Board(
 											BoardSizes					theSize,
-											unsigned int				anId,
-											unsigned int				anEvtTableId);
+											unsigned int				anId);
 										~Board() = default;
 
 	short								GetSize();
 	unsigned int						GetID();
-	unsigned int						GetEvtTableID();
+	std::optional<Point>				GetPoint(
+											short						aPos);
 	std::weak_ptr<Row[]>				GetSector(
 											Point						aPos);
 	std::vector<Point>					GetMarkedPositions();
@@ -68,7 +68,6 @@ private:
 	short								mySize;
 	short								realSize;
 	short								cellsAmount;
-	unsigned int						myEvtTableId;
 
 	std::shared_ptr<Row[]>				theSection;
 	std::unique_ptr<Row[]>				theBoard;

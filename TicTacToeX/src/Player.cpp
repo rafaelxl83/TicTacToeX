@@ -57,7 +57,7 @@ Player::Player(
 unsigned int
 Player::MakeAMove()
 {
-	unsigned int mark = -1;
+	unsigned int mark = NO_MARK;
 	if (myState == PlayerState::Turn)
 	{
 		myStream >> mark;
@@ -141,7 +141,7 @@ bool
 Player::RemBoard(
 	int							index)
 {
-	int s = myBoards.size();
+	size_t s = myBoards.size();
 	if (0 < index && index < s)
 		myBoards.erase(myBoards.begin() + index);
 
