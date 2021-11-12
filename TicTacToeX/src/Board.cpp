@@ -76,24 +76,32 @@ Board::SetMark(
 	Symbol						aSymbol
 )
 {
-	// invalid parameters
-	if (aSymbol.GetProperty().value == 0)
-		return false;
-	if (aPos.x >= mySize || aPos.y >= mySize)
-		return false;
-	// point already marked
-	if (theBoard
-		[aPos.x + VERIFICATION_ADJUSTMENT]
-		[aPos.y + VERIFICATION_ADJUSTMENT].
-			GetProperty().value != (int)Symbol::AvailableSymbols::empty)
-		return false;
+	try
+	{
+		// invalid parameters
+		if (aSymbol.GetProperty().value == 0)
+			return false;
+		if (aPos.x >= mySize || aPos.y >= mySize)
+			return false;
+		// point already marked
+		if (theBoard
+			[aPos.x + VERIFICATION_ADJUSTMENT]
+			[aPos.y + VERIFICATION_ADJUSTMENT].
+				GetProperty().value != (int)Symbol::AvailableSymbols::empty)
+			return false;
 
-	theBoard
-		[aPos.x + VERIFICATION_ADJUSTMENT]
-		[aPos.y + VERIFICATION_ADJUSTMENT] = aSymbol;
+		theBoard
+			[aPos.x + VERIFICATION_ADJUSTMENT]
+			[aPos.y + VERIFICATION_ADJUSTMENT] = aSymbol;
 
-	markedCells.push_back(Point(aPos.x, aPos.y));
-	return true;
+		markedCells.push_back(Point(aPos.x, aPos.y));
+		hasUpdate = true;
+		return true;
+	}
+	catch (...)
+	{
+		Log("[Board]", myId, "SetMark", "Exception:", ExceptionHelper::what());
+	}
 }
 bool
 Board::SetMark(
@@ -130,6 +138,13 @@ Board::Initialize()
 			boardMap.insert(std::pair<short, Point>(k++, Point(i, j)));
 
 	markedCells = std::vector<Point>();
+	hasUpdate = true;
+}
+
+bool
+Board::HasUpdate()
+{
+	return hasUpdate;
 }
 
 void
@@ -156,6 +171,7 @@ Board::PrintBoard(
 			if(p.first < cellsAmount)
 				aStream << (p.first % mySize == 0 ? line : "|");
 	}
+	hasUpdate = false;
 }
 
 std::string

@@ -1,8 +1,9 @@
 #pragma once
 
-#include <vector>
-
 #include "Symbol.h"
+
+#include <vector>
+#include <optional>
 
 class Player
 {
@@ -45,13 +46,15 @@ public:
 	Symbol								GetPlayerSymbol();
 
 	std::vector<unsigned int>			GetAllBoards();
-	unsigned int						GetBoardId(
+	std::optional<unsigned int>			GetBoardId(
 											int							index);
 	int									GetBoardIndex(
 											unsigned int				aBoardId);
 
 	bool								AddBoardId(
 											unsigned int				aBoardId);
+	bool								AddBoardId(
+											std::vector<unsigned int>	aBoardId);
 	bool								RemBoard(
 											int							index);
 	bool								RemBoard(

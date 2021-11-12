@@ -14,12 +14,20 @@ GamePlay::OnMessageEndOfGame(
 		if (aMessage.callerId != myId)
 			return;
 
+		if (shutDown) 
+			return;
+
 		// notify the players about the end
 		// and send the winner if there are
 		// one
 		SEND_TO_PLAYERS(MessageEndOfGame(
 			aMessage.callerId,
 			aMessage.theWinner));
+
+		SEND_TO_GAMEPLAY(MessageShutdown(
+			aMessage.callerId));
+
+		Log("[GamePlay]", "OnMessageEndOfGame");
 	}
 	catch (std::system_error& ex)
 	{
@@ -35,17 +43,11 @@ GamePlay::OnMessageStartOfGame(
 		if (aMessage.callerId != myId)
 			return;
 
-		std::optional<Board*> b = GetBoard(0);
-		if (!b.has_value())
-		{
-			Log("[GamePlay]", "OnMessageStartOfGame",
-				"FATAL", "There are no boards to play!");
-			return;
-		}
-
 		SEND_TO_GAMEPLAY(MessageTurnChanged(
 			aMessage.callerId,
-			b.value()->GetID()));
+			aMessage.myPlayerId,
+			aMessage.myBoardId,
+			false));
 	}
 	catch (std::system_error& ex)
 	{
@@ -72,8 +74,14 @@ GamePlay::OnMessageTurnChanged(
 				return;
 			}
 
-			// check if there are a winner
-			theWinner = HasWinner(*b.value());
+			if (b.value()->HasUpdate())
+			{
+				system("CLS");
+				std::cout << PrintBoard(aMessage.myBoardId) << std::endl;
+
+				// check if there are a winner
+				theWinner = HasWinner(*b.value());
+			}
 
 			// If exist a winner, compute the victory ponts
 			// and call the end of the game for this board
@@ -85,16 +93,20 @@ GamePlay::OnMessageTurnChanged(
 					aMessage.myBoardId,
 					(int)ScorePoints::WINNER,
 					(int)theWinner.GetProperty().symbol));
-			}
 
+				SEND_TO_GAMEPLAY(MessageEndOfGame(
+					aMessage.callerId,
+					aMessage.myBoardId,
+					(int)theWinner.GetProperty().symbol));
+			}
 			// No winner, check if this board is full and
 			// keep running the playthrough
 			else if(!b.value()->IsFull())
 				SEND_TO_GAMEPLAY(MessageTurnChanged(
 					aMessage.callerId,
+					aMessage.myPlayerId,
 					aMessage.myBoardId,
 					myTurnCounter));
-
 			// the board is full, no winners, so
 			// it is the end of the playthrough
 			// for this board
@@ -157,14 +169,25 @@ GamePlay::OnMessageSingleMove(
 			if(marked)
 			{
 				Turn();
+				SEND_TO_GAMEPLAY(MessageScorePoints(
+					aMessage.callerId,
+					aMessage.myPlayerId,
+					aMessage.myBoardId,
+					(int)ScorePoints::SMOVE,
+					aMessage.symbol));
+
 				// get the next player input
 				SEND_TO_PLAYERS(MessageTurnChanged(
-					aMessage.callerId, 1));
+					aMessage.callerId, true));
 			}
 			else
-				// get the same player input
+			{
+				// get the same player input again
 				SEND_TO_PLAYERS(MessageTurnChanged(
-					aMessage.callerId, 0));
+					aMessage.callerId, false));
+				Log("[GamePlay]", "OnMessageSingleMove",
+					"ERROR", "Invalid position for this board");
+			}
 
 			SEND_TO_GAMEPLAY(MessageTurnChanged(
 				aMessage.callerId,
@@ -187,6 +210,13 @@ GamePlay::OnMessageBlockMove(
 		if (aMessage.callerId != myId)
 			return;
 
+		SEND_TO_GAMEPLAY(MessageScorePoints(
+			aMessage.callerId,
+			aMessage.myPlayerId,
+			aMessage.myBoardId,
+			(int)ScorePoints::BMOVE,
+			aMessage.symbol));
+
 	}
 	catch (std::system_error& ex)
 	{
@@ -201,6 +231,10 @@ GamePlay::OnMessageScorePoints(
 	{
 		if (aMessage.callerId != myId)
 			return;
+
+		// Register the points 
+		std::cout << "Player: [" << Symbol((Symbol::AvailableSymbols)aMessage.symbol);
+		std::cout << "] Scored points: [" << aMessage.points << "]" << std::endl;
 
 	}
 	catch (std::system_error& ex)
@@ -269,6 +303,13 @@ GamePlay::~GamePlay()
 void
 GamePlay::Start()
 {
+	if (myBoards.size() == 0)
+	{
+		Log("[GamePlay]", "Start",
+			"FATAL", "There are no boards to play!");
+		return;
+	}
+
 	REGISTER_BOARD(MessageShutdown,			GamePlay::OnMessageShutdown		);
 	REGISTER_BOARD(MessageEndOfGame,		GamePlay::OnMessageEndOfGame	);
 	REGISTER_BOARD(MessageStartOfGame,		GamePlay::OnMessageStartOfGame	);
@@ -279,7 +320,6 @@ GamePlay::Start()
 
 	Initialize();
 
-	SEND_TO_GAMEPLAY(MessageStartOfGame(myId));
 	SEND_TO_PLAYERS(MessageStartOfGame(myId));
 }
 
@@ -446,18 +486,20 @@ GamePlay::HasWinner(
 
 	int s = aBoard.GetSize() - 1;
 	std::weak_ptr<Row[]> aSection;
-	std::vector<Point> marked;
-	std::vector<Point> ignore = {Point(), Point(0,s), Point(s,0), Point(s,s)};
+	std::vector<Point> marked = aBoard.GetMarkedPositions();
+	//std::vector<Point> ignore = {Point(), Point(0,s), Point(s,0), Point(s,s)};
 
-	// No need to check corners
-	std::ranges::copy_if(
-		aBoard.GetMarkedPositions(),
-		std::back_inserter(marked),
-		[ignore](Point& p)
-		{
-			return (std::ranges::find(ignore, p) == ignore.end());
-		}
-	);
+	//// No need to check corners
+	//// avoid to perform more 32
+	//// operations
+	//std::ranges::copy_if(
+	//	aBoard.GetMarkedPositions(),
+	//	std::back_inserter(marked),
+	//	[ignore](Point& p)
+	//	{
+	//		return (std::ranges::find(ignore, p) == ignore.end());
+	//	}
+	//);
 
 	for (Point p : marked)
 	{

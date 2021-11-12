@@ -108,11 +108,11 @@ Player::GetAllBoards()
 	return myBoards;
 }
 
-unsigned int
+std::optional<unsigned int>
 Player::GetBoardId(
 	int							index)
 {
-	return myBoards[index];
+	return std::make_optional(myBoards[index]);
 }
 
 int
@@ -134,6 +134,13 @@ Player::AddBoardId(
 		return false;
 
 	myBoards.push_back(aBoardId);
+	return true;
+}
+bool
+Player::AddBoardId(
+	std::vector<unsigned int>	aBoardId)
+{
+	std::ranges::move(aBoardId, std::back_inserter(myBoards));
 	return true;
 }
 

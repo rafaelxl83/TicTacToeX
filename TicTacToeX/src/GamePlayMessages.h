@@ -96,8 +96,25 @@ public:
 	}
 
 	MessageStartOfGame(
+		unsigned int aPlayerId,
+		unsigned int aBoardId)
+		: MessageGamePlayBase(
+			aPlayerId, aBoardId)
+	{
+	}
+
+	MessageStartOfGame(
 		unsigned int anId)
-	: MessageGamePlayBase(anId)
+		: MessageGamePlayBase(anId)
+	{
+	}
+
+	MessageStartOfGame(
+		unsigned int anId,
+		unsigned int aPlayerId,
+		unsigned int aBoardId)
+		: MessageGamePlayBase(
+			anId, aPlayerId, aBoardId)
 	{
 	}
 };
@@ -161,7 +178,7 @@ public:
 	{
 	}
 
-	int turn;
+	int turn = 0;
 };
 
 class MessageSingleMove
@@ -231,8 +248,8 @@ public:
 	{
 	}
 
-	int mark;
-	int symbol;
+	int mark = 0;
+	int symbol = 0;
 };
 
 class MessageScorePoints
@@ -267,8 +284,8 @@ public:
 	{
 	}
 
-	int points;
-	int symbol;
+	int points = 0;
+	int symbol = 0;
 };
 
 class MessageBlockMove
@@ -285,6 +302,32 @@ public:
 	: MessageGamePlayBase(anId)
 	{
 	}
+
+	MessageBlockMove(
+		unsigned int anId,
+		int thePoints,
+		int theSymbol)
+		: MessageGamePlayBase(anId)
+		, points(thePoints)
+		, symbol(theSymbol)
+	{
+	}
+
+	MessageBlockMove(
+		unsigned int anId,
+		unsigned int aPlayerId,
+		unsigned int aBoardId,
+		int thePoints,
+		int theSymbol)
+		: MessageGamePlayBase(
+			anId, aPlayerId, aBoardId)
+		, points(thePoints)
+		, symbol(theSymbol)
+	{
+	}
+
+	int points = 0;
+	int symbol = 0;
 };
 
 class MessageShutdown

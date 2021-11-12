@@ -3,6 +3,7 @@
 #include "Player.h"
 
 #include <mutex>
+#include <map>
 
 class Players
 {
@@ -50,11 +51,11 @@ private:
 	unsigned int			GetInput(
 								unsigned int				aPlayerId);
 
-	unsigned int			myId;
-	std::vector<Player*>	myPlayers;
-	unsigned int			myPlayersLimitCount;
-	int						playerTurn = 1;
-	bool					done = false;
+	unsigned int							myId;
+	std::vector<Player*>					myPlayers;
+	unsigned int							myPlayersLimitCount;
+	int										playerTurn = 0;
+	bool									done = false;
 };
 
-#define PLAYERS_DEFAULT_ID				static_cast<unsigned int>(GetHashID("PLAY15102344370000000"))
+#define PLAYERS_DEFAULT_ID					static_cast<unsigned int>(GetHashID("PLAY15102344370000000"))

@@ -50,6 +50,7 @@ public:
 											Symbol						aSymbol);
 
 	bool								IsFull();
+	bool								HasUpdate();
 
 	void								PrintBoard(
 											std::ostream&				aStream);
@@ -68,6 +69,7 @@ private:
 	short								mySize;
 	short								realSize;
 	short								cellsAmount;
+	bool								hasUpdate = false;
 
 	std::shared_ptr<Row[]>				theSection;
 	std::unique_ptr<Row[]>				theBoard;

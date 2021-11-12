@@ -15,6 +15,15 @@ Players::OnMessageEndOfGame(
 			return;
 
 		// check if there are winner or it is a tie
+		if (aMessage.theWinner != (int)Symbol::AvailableSymbols::empty)
+		{
+			// print the winner and the players score
+		}
+		else
+		{
+			// print the players score
+		}
+		Done();
 	}
 	catch (std::system_error& ex)
 	{
@@ -30,9 +39,25 @@ Players::OnMessageStartOfGame(
 		if (done || aMessage.callerId != myId)
 			return;
 
+		std::optional<Player*> p = GetPlayer(0);
+		if (!p.has_value() || !p.value()->GetBoardId(0).has_value())
+		{
+			Log("[Players]", "OnMessageStartOfGame",
+				"FATAL", "There are no player or board to play!");
+			return;
+		}
+
+		SEND_TO_GAMEPLAY(MessageStartOfGame(
+			aMessage.callerId,
+			p.value()->GetID(),
+			p.value()->GetBoardId(0).value()));
+
 		// call the turn of events
 		SEND_TO_PLAYERS(MessageTurnChanged(
-			aMessage.callerId));
+			aMessage.callerId, 
+			p.value()->GetID(),
+			p.value()->GetBoardId(0).value(),
+			false));
 	}
 	catch (std::system_error& ex)
 	{
@@ -48,15 +73,41 @@ Players::OnMessageTurnChanged(
 		if (done || aMessage.callerId != myId)
 			return;
 
+		if (aMessage.turn)
+		{
+			// get next player ID
+			Turn();
+		}
+
+		std::optional<Player*> player = GetPlayer(playerTurn);
+		if (!player.has_value() || !player.value()->GetBoardId(0).has_value())
+		{
+			Log("[Players]", "MessageTurnChanged",
+				"FATAL", "There are no player or board to play!");
+			return;
+		}
+
+		int symbol = (int)player.value()->
+			GetPlayerSymbol().
+			GetProperty().symbol;
+
 		// get the first available player to make a movement
 		// all others must be with the idle state
 		// with the correct player listed must send the message
 		// to perform a movement
 		SEND_TO_PLAYERS(MessageSingleMove(
 			aMessage.callerId,
-			aMessage.myPlayerId,
-			aMessage.myBoardId, 0
-		));
+			player.value()->GetID(),
+			player.value()->GetBoardId(0).value(), 
+			0, symbol
+			));
+
+		// call the turn of events
+		SEND_TO_PLAYERS(MessageTurnChanged(
+			aMessage.callerId,
+			player.value()->GetID(),
+			player.value()->GetBoardId(0).value(),
+			false));
 	}
 	catch (std::system_error& ex)
 	{
@@ -79,6 +130,8 @@ Players::OnMessageSingleMove(
 		if (player.has_value())
 		{
 			int mark = GetInput(aMessage.myPlayerId);
+			if (mark == 0) return;
+
 			int symbol = (int)player.value()->
 				GetPlayerSymbol().
 				GetProperty().symbol;
@@ -138,6 +191,13 @@ Players::~Players()
 void
 Players::Start()
 {
+	if (myPlayers.size() == 0)
+	{
+		Log("[Players]", "Start",
+			"FATAL", "There are no players!");
+		return;
+	}
+
 	REGISTER_PLAYER(MessageEndOfGame,		Players::OnMessageEndOfGame);
 	REGISTER_PLAYER(MessageStartOfGame,		Players::OnMessageStartOfGame);
 	REGISTER_PLAYER(MessageTurnChanged,		Players::OnMessageTurnChanged);
@@ -155,13 +215,24 @@ Players::Done()
 void
 Players::Initialize()
 {
+	myPlayersLimitCount = myPlayers.size() - 1;
 
+	for (Player* p : myPlayers)
+		p->SetState(Player::PlayerState::Idle);
+	myPlayers[0]->SetState(Player::PlayerState::Turn);
 }
 
 void
 Players::Turn()
 {
+	int lastTurn = playerTurn;
+	if (playerTurn == myPlayersLimitCount)
+		playerTurn = 0;
+	else
+		playerTurn++;
 
+	myPlayers[playerTurn]->SetState(Player::PlayerState::Turn);
+	myPlayers[lastTurn]->SetState(Player::PlayerState::Idle);
 }
 #pragma endregion
 
