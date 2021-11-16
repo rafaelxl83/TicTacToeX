@@ -44,7 +44,8 @@ public:
 
 private:
 	virtual void			Initialize();
-	virtual void			Turn();
+	virtual void			Turn(
+								bool						nextPlayer);
 
 	unsigned int			GetInput(
 								int							anIndex);

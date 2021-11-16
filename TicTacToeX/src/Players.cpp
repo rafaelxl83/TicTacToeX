@@ -73,11 +73,8 @@ Players::OnMessageTurnChanged(
 		if (done || aMessage.callerId != myId)
 			return;
 
-		if (aMessage.turn)
-		{
-			// get next player ID
-			Turn();
-		}
+		// get next player ID
+		Turn(aMessage.turn);
 
 		std::optional<Player*> player = GetPlayer(playerTurn);
 		if (!player.has_value() || !player.value()->GetBoardId(0).has_value())
@@ -95,12 +92,13 @@ Players::OnMessageTurnChanged(
 		// all others must be with the idle state
 		// with the correct player listed must send the message
 		// to perform a movement
-		SEND_TO_PLAYERS(MessageSingleMove(
-			aMessage.callerId,
-			player.value()->GetID(),
-			player.value()->GetBoardId(0).value(), 
-			0, symbol
-			));
+		if(player.value()->GetState() == Player::PlayerState::Turn)
+			SEND_TO_PLAYERS(MessageSingleMove(
+				aMessage.callerId,
+				player.value()->GetID(),
+				player.value()->GetBoardId(0).value(), 
+				0, symbol
+				));
 
 		// call the turn of events
 		SEND_TO_PLAYERS(MessageTurnChanged(
@@ -131,6 +129,8 @@ Players::OnMessageSingleMove(
 		{
 			int mark = GetInput(aMessage.myPlayerId);
 			if (mark == 0) return;
+
+			player.value()->SetState(Player::PlayerState::Idle);
 
 			int symbol = (int)player.value()->
 				GetPlayerSymbol().
@@ -223,16 +223,19 @@ Players::Initialize()
 }
 
 void
-Players::Turn()
+Players::Turn(
+	bool						nextPlayer)
 {
+	if (!nextPlayer) return;
+
 	int lastTurn = playerTurn;
 	if (playerTurn == myPlayersLimitCount)
 		playerTurn = 0;
 	else
 		playerTurn++;
 
-	myPlayers[playerTurn]->SetState(Player::PlayerState::Turn);
 	myPlayers[lastTurn]->SetState(Player::PlayerState::Idle);
+	myPlayers[playerTurn]->SetState(Player::PlayerState::Turn);
 }
 #pragma endregion
 

@@ -5,7 +5,7 @@
 using namespace std::literals;
 
 // Shrink this number to make the system go faster.
-static constexpr auto locThreadWaitTime = 50ms;
+static constexpr auto locThreadWaitTime = 1000ms;
 
 void
 Threads::Worker(

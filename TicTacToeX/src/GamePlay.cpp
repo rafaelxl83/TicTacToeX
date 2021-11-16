@@ -14,20 +14,20 @@ GamePlay::OnMessageEndOfGame(
 		if (aMessage.callerId != myId)
 			return;
 
-		if (shutDown) 
-			return;
+		if (!shutDown)
+		{
+			// notify the players about the end
+			// and send the winner if there are
+			// one
+			SEND_TO_PLAYERS(MessageEndOfGame(
+				aMessage.callerId,
+				aMessage.theWinner));
 
-		// notify the players about the end
-		// and send the winner if there are
-		// one
-		SEND_TO_PLAYERS(MessageEndOfGame(
-			aMessage.callerId,
-			aMessage.theWinner));
+			SEND_TO_GAMEPLAY(MessageShutdown(
+				aMessage.callerId));
 
-		SEND_TO_GAMEPLAY(MessageShutdown(
-			aMessage.callerId));
-
-		Log("[GamePlay]", "OnMessageEndOfGame");
+			Log("[GamePlay]", "OnMessageEndOfGame");
+		}
 	}
 	catch (std::system_error& ex)
 	{
@@ -524,22 +524,31 @@ GamePlay::CheckSection(
 		  aSection[0][1].GetProperty().value + 
 		  aSection[0][2].GetProperty().value;
 	sum = Evaluate(sum);
-	Log("[GamePlay]", "CheckSection H1", sum);
-	if (sum > 0) return sum;
+	if (sum > 0)
+	{
+		Log("[GamePlay]", "CheckSection H1", sum);
+		return sum;
+	}
 
 	sum = aSection[1][0].GetProperty().value + 
 		  aSection[1][1].GetProperty().value + 
 		  aSection[1][2].GetProperty().value;
 	sum = Evaluate(sum);
-	Log("[GamePlay]", "CheckSection H2", sum);
-	if (sum > 0) return sum;
+	if (sum > 0)
+	{
+		Log("[GamePlay]", "CheckSection H2", sum);
+		return sum;
+	}
 
 	sum = aSection[2][0].GetProperty().value + 
 		  aSection[2][1].GetProperty().value + 
 		  aSection[2][2].GetProperty().value;
 	sum = Evaluate(sum);
-	Log("[GamePlay]", "CheckSection H3", sum);
-	if (sum > 0) return sum;
+	if (sum > 0)
+	{
+		Log("[GamePlay]", "CheckSection H3", sum);
+		return sum;
+	}
 #pragma endregion
 
 #pragma region "Vertical"
@@ -547,22 +556,31 @@ GamePlay::CheckSection(
 		  aSection[1][0].GetProperty().value + 
 		  aSection[2][0].GetProperty().value;
 	sum = Evaluate(sum);
-	Log("[GamePlay]", "CheckSection V1", sum);
-	if (sum > 0) return sum;
+	if (sum > 0)
+	{
+		Log("[GamePlay]", "CheckSection V1", sum);
+		return sum;
+	}
 
 	sum = aSection[0][1].GetProperty().value + 
 		  aSection[1][1].GetProperty().value + 
 		  aSection[2][1].GetProperty().value;
 	sum = Evaluate(sum);
-	Log("[GamePlay]", "CheckSection V2", sum);
-	if (sum > 0) return sum;
+	if (sum > 0)
+	{
+		Log("[GamePlay]", "CheckSection V2", sum);
+		return sum;
+	}
 
 	sum = aSection[0][2].GetProperty().value + 
 		  aSection[1][2].GetProperty().value + 
 		  aSection[2][2].GetProperty().value;
 	sum = Evaluate(sum);
-	Log("[GamePlay]", "CheckSection V3", sum);
-	if (sum > 0) return sum;
+	if (sum > 0)
+	{
+		Log("[GamePlay]", "CheckSection V3", sum);
+		return sum;
+	}
 #pragma endregion
 
 #pragma region "Diagonal"
@@ -570,15 +588,21 @@ GamePlay::CheckSection(
 		  aSection[1][1].GetProperty().value + 
 		  aSection[2][2].GetProperty().value;
 	sum = Evaluate(sum);
-	Log("[GamePlay]", "CheckSection D1", sum);
-	if (sum > 0) return sum;
+	if (sum > 0)
+	{
+		Log("[GamePlay]", "CheckSection D1", sum);
+		return sum;
+	}
 
 	sum = aSection[0][2].GetProperty().value + 
 		  aSection[1][1].GetProperty().value + 
 		  aSection[2][0].GetProperty().value;
 	sum = Evaluate(sum);
-	Log("[GamePlay]", "CheckSection D2", sum);
-	if (sum > 0) return sum;
+	if (sum > 0)
+	{
+		Log("[GamePlay]", "CheckSection D2", sum);
+		return sum;
+	}
 #pragma endregion
 
 	return 0;
