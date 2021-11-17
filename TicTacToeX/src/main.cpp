@@ -23,14 +23,40 @@ void FirstGame()
 		Symbol(Symbol::AvailableSymbols::O),
 		std::cin);
 
-	Board* board = new Board(GetHashID(GenKey("BOARD1")));
+	Player* p3 = new Player(
+		GetHashID(GenKey("PLAYER3")),
+		"PLAYER3",
+		Symbol(Symbol::AvailableSymbols::M),
+		std::cin);
+
+	Player* p4 = new Player(
+		GetHashID(GenKey("PLAYER4")),
+		"PLAYER4",
+		Symbol(Symbol::AvailableSymbols::S),
+		std::cin);
+
+	Player* p5 = new Player(
+		GetHashID(GenKey("PLAYER5")),
+		"PLAYER5",
+		Symbol(Symbol::AvailableSymbols::H),
+		std::cin);
+
+	Board* board = new Board(
+		BoardSizes::FivePlayers, 
+		GetHashID(GenKey("BOARD1")));
 
 	p1->AddBoardId(board->GetID());
 	p2->AddBoardId(board->GetID());
+	p3->AddBoardId(board->GetID());
+	p4->AddBoardId(board->GetID());
+	p5->AddBoardId(board->GetID());
 
 	Players* p = new Players(1);
 	p->AddPlayer(p1);
 	p->AddPlayer(p2);
+	p->AddPlayer(p3);
+	p->AddPlayer(p4);
+	p->AddPlayer(p5);
 
 	GamePlay* g = new GamePlay(1);
 	g->AddBoard(board);

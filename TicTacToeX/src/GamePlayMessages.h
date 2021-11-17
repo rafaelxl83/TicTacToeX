@@ -4,6 +4,21 @@
 
 #define DEFAULT_ID			1
 
+enum class ScorePoints : int
+{
+	WINNER = 100,
+	SMOVE = 5,
+	BMOVE = 15,
+	LOOSE = -5
+};
+
+enum class TurnActions : int
+{
+	Next = 0,
+	Retake,
+	None
+};
+
 class MessageGamePlayBase
 {
 public:

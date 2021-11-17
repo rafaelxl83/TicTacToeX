@@ -178,13 +178,15 @@ GamePlay::OnMessageSingleMove(
 
 				// get the next player input
 				SEND_TO_PLAYERS(MessageTurnChanged(
-					aMessage.callerId, true));
+					aMessage.callerId, 
+					(int)TurnActions::Next));
 			}
 			else
 			{
 				// get the same player input again
 				SEND_TO_PLAYERS(MessageTurnChanged(
-					aMessage.callerId, false));
+					aMessage.callerId,
+					(int)TurnActions::Retake));
 				Log("[GamePlay]", "OnMessageSingleMove",
 					"ERROR", "Invalid position for this board");
 			}
@@ -209,13 +211,15 @@ GamePlay::OnMessageBlockMove(
 	{
 		if (aMessage.callerId != myId)
 			return;
-
-		SEND_TO_GAMEPLAY(MessageScorePoints(
-			aMessage.callerId,
-			aMessage.myPlayerId,
-			aMessage.myBoardId,
-			(int)ScorePoints::BMOVE,
-			aMessage.symbol));
+		if (!shutDown)
+		{
+			SEND_TO_GAMEPLAY(MessageScorePoints(
+				aMessage.callerId,
+				aMessage.myPlayerId,
+				aMessage.myBoardId,
+				(int)ScorePoints::BMOVE,
+				aMessage.symbol));
+		}
 
 	}
 	catch (std::system_error& ex)
@@ -232,9 +236,12 @@ GamePlay::OnMessageScorePoints(
 		if (aMessage.callerId != myId)
 			return;
 
-		// Register the points 
-		std::cout << "Player: [" << Symbol((Symbol::AvailableSymbols)aMessage.symbol);
-		std::cout << "] Scored points: [" << aMessage.points << "]" << std::endl;
+		if (!shutDown)
+		{
+			// Register the points 
+			std::cout << "Player: [" << Symbol((Symbol::AvailableSymbols)aMessage.symbol);
+			std::cout << "] Scored points: [" << aMessage.points << "]" << std::endl;
+		}
 
 	}
 	catch (std::system_error& ex)

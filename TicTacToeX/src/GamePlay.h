@@ -6,14 +6,6 @@
 #include <mutex>
 #include <optional>
 
-enum class ScorePoints : int
-{
-	WINNER = 100,
-	SMOVE = 5,
-	BMOVE = 15,
-	LOOSE = -5
-};
-
 class GamePlay
 {
 public:

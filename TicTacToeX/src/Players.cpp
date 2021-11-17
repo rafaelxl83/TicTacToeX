@@ -57,7 +57,7 @@ Players::OnMessageStartOfGame(
 			aMessage.callerId, 
 			p.value()->GetID(),
 			p.value()->GetBoardId(0).value(),
-			false));
+			(int)TurnActions::Retake));
 	}
 	catch (std::system_error& ex)
 	{
@@ -73,8 +73,7 @@ Players::OnMessageTurnChanged(
 		if (done || aMessage.callerId != myId)
 			return;
 
-		// get next player ID
-		Turn(aMessage.turn);
+		Turn((TurnActions)aMessage.turn);
 
 		std::optional<Player*> player = GetPlayer(playerTurn);
 		if (!player.has_value() || !player.value()->GetBoardId(0).has_value())
@@ -101,11 +100,13 @@ Players::OnMessageTurnChanged(
 				));
 
 		// call the turn of events
+		// just the board can confirm if its
+		// time to change the player turn
 		SEND_TO_PLAYERS(MessageTurnChanged(
 			aMessage.callerId,
 			player.value()->GetID(),
 			player.value()->GetBoardId(0).value(),
-			false));
+			(int)TurnActions::None));
 	}
 	catch (std::system_error& ex)
 	{
@@ -128,7 +129,7 @@ Players::OnMessageSingleMove(
 		if (player.has_value())
 		{
 			int mark = GetInput(aMessage.myPlayerId);
-			if (mark == 0) return;
+			if (mark == NO_MARK) return;
 
 			player.value()->SetState(Player::PlayerState::Idle);
 
@@ -224,18 +225,25 @@ Players::Initialize()
 
 void
 Players::Turn(
-	bool						nextPlayer)
+	TurnActions						anAction)
 {
-	if (!nextPlayer) return;
-
 	int lastTurn = playerTurn;
-	if (playerTurn == myPlayersLimitCount)
-		playerTurn = 0;
-	else
-		playerTurn++;
+	switch (anAction)
+	{
+		case TurnActions::Next:
+			if (playerTurn == myPlayersLimitCount)
+				playerTurn = 0;
+			else
+				playerTurn++;
 
-	myPlayers[lastTurn]->SetState(Player::PlayerState::Idle);
-	myPlayers[playerTurn]->SetState(Player::PlayerState::Turn);
+			myPlayers[lastTurn]->SetState(Player::PlayerState::Idle);
+		case TurnActions::Retake:
+			myPlayers[playerTurn]->SetState(Player::PlayerState::Turn);
+			break;
+		case TurnActions::None:
+		default: 
+			break;
+	}
 }
 #pragma endregion
 
@@ -286,7 +294,7 @@ Players::GetInput(
 	if (player.has_value())
 		return player.value()->MakeAMove();
 
-	return false;
+	return NO_MARK;
 }
 unsigned int
 Players::GetInput(
@@ -296,6 +304,6 @@ Players::GetInput(
 	if (player.has_value())
 		return player.value()->MakeAMove();
 
-	return false;
+	return NO_MARK;
 }
 #pragma endregion

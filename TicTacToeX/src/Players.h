@@ -1,6 +1,6 @@
 #pragma once
-#include "GamePlayMessages.h"
 #include "Player.h"
+#include "GamePlayMessages.h"
 
 #include <mutex>
 #include <map>
@@ -45,7 +45,7 @@ public:
 private:
 	virtual void			Initialize();
 	virtual void			Turn(
-								bool						nextPlayer);
+								TurnActions					anAction);
 
 	unsigned int			GetInput(
 								int							anIndex);
