@@ -148,7 +148,7 @@ bool
 Player::RemBoard(
 	int							index)
 {
-	size_t s = myBoards.size();
+	int s = myBoards.size();
 	if (0 < index && index < s)
 		myBoards.erase(myBoards.begin() + index);
 

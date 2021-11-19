@@ -169,7 +169,6 @@
     <ClInclude Include="src\GamePlay.h" />
     <ClInclude Include="src\GamePlayMessages.h" />
     <ClInclude Include="src\Player.h" />
-    <ClInclude Include="src\PlayerMessages.h" />
     <ClInclude Include="src\Players.h" />
     <ClInclude Include="src\Symbol.h" />
     <ClInclude Include="src\WorkerCompanion.h" />

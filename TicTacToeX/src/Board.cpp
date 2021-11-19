@@ -102,6 +102,7 @@ Board::SetMark(
 	{
 		Log("[Board]", myId, "SetMark", "Exception:", ExceptionHelper::what());
 	}
+	return false;
 }
 bool
 Board::SetMark(

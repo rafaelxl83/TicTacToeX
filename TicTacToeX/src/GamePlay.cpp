@@ -190,12 +190,6 @@ GamePlay::OnMessageSingleMove(
 				Log("[GamePlay]", "OnMessageSingleMove",
 					"ERROR", "Invalid position for this board");
 			}
-
-			SEND_TO_GAMEPLAY(MessageTurnChanged(
-				aMessage.callerId,
-				aMessage.myPlayerId,
-				aMessage.myBoardId,
-				myTurnCounter));
 		}
 	}
 	catch (std::system_error& ex)
@@ -310,7 +304,7 @@ GamePlay::~GamePlay()
 void
 GamePlay::Start()
 {
-	if (myBoards.size() == 0)
+	if (myBoards.empty())
 	{
 		Log("[GamePlay]", "Start",
 			"FATAL", "There are no boards to play!");

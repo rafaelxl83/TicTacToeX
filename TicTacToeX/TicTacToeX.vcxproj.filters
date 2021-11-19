@@ -89,9 +89,6 @@
     <ClInclude Include="src\Players.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PlayerMessages.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Symbol.h">
       <Filter>Header Files</Filter>
     </ClInclude>

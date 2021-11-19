@@ -192,17 +192,17 @@ Players::~Players()
 void
 Players::Start()
 {
-	if (myPlayers.size() == 0)
+	if (myPlayers.empty())
 	{
 		Log("[Players]", "Start",
 			"FATAL", "There are no players!");
 		return;
 	}
 
-	REGISTER_PLAYER(MessageEndOfGame,		Players::OnMessageEndOfGame);
-	REGISTER_PLAYER(MessageStartOfGame,		Players::OnMessageStartOfGame);
-	REGISTER_PLAYER(MessageTurnChanged,		Players::OnMessageTurnChanged);
-	REGISTER_PLAYER(MessageSingleMove,		Players::OnMessageSingleMove);
+	REGISTER_PLAYER(MessageEndOfGame,		Players::OnMessageEndOfGame		);
+	REGISTER_PLAYER(MessageStartOfGame,		Players::OnMessageStartOfGame	);
+	REGISTER_PLAYER(MessageTurnChanged,		Players::OnMessageTurnChanged	);
+	REGISTER_PLAYER(MessageSingleMove,		Players::OnMessageSingleMove	);
 
 	Initialize();
 }
