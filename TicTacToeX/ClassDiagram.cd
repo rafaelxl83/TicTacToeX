@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Board">
+    <Position X="18.25" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAIEAEACAACQCEAIAAoIADAIAAAAAKAAAAAKAAAgA=</HashCode>
+      <FileName>src\Board.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EventTable">
+    <Position X="20.25" Y="7.25" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Struct Name="EventTable::EventRow">
+        <TypeIdentifier>
+          <NewMemberFileName>src\EventTable.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAEAAQAEAAAAgAABAAAIAAAAACAAAAAABAA=</HashCode>
+      <FileName>src\EventTable.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ExceptionHelper">
+    <Position X="4.75" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAACAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\ExceptionHelper.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GamePlay">
+    <Position X="16" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAUAIgCIQGUIAAACDAgABAIIAAAALCCiABQAAAAA=</HashCode>
+      <FileName>src\GamePlay.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageGamePlayBase">
+    <Position X="11.5" Y="2.25" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQA=</HashCode>
+      <FileName>src\GamePlayMessages.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageEndOfGame">
+    <Position X="11.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAACAAAAAAAAA=</HashCode>
+      <FileName>src\GamePlayMessages.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageStartOfGame">
+    <Position X="16" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\GamePlayMessages.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageTurnChanged">
+    <Position X="4.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\GamePlayMessages.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageSingleMove">
+    <Position X="7" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAgAA=</HashCode>
+      <FileName>src\GamePlayMessages.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageScorePoints">
+    <Position X="9.25" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAACAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\GamePlayMessages.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageBlockMove">
+    <Position X="13.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAACAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAA=</HashCode>
+      <FileName>src\GamePlayMessages.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageShutdown">
+    <Position X="18.25" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\GamePlayMessages.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Player">
+    <Position X="11.5" Y="7.25" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="Player::PlayerState">
+        <TypeIdentifier>
+          <NewMemberFileName>src\Player.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>BAAABEAAIAAAiEAEAACAgAABQAAAAAAAAYAQAQAgEAA=</HashCode>
+      <FileName>src\Player.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Players">
+    <Position X="13.75" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQBAAAgIQCAAEQAAAAECAEQhAIIgAAAIAAgAIAAAAAA=</HashCode>
+      <FileName>src\Players.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Symbol">
+    <Position X="9.25" Y="7.25" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="Symbol::AvailableSymbols">
+        <TypeIdentifier>
+          <NewMemberFileName>src\Symbol.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Struct Name="Symbol::SymbolProperty">
+        <TypeIdentifier>
+          <NewMemberFileName>src\Symbol.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAIAAAAAAAAAAAAQAAAAEAAAAAAAAgAAACCAA=</HashCode>
+      <FileName>src\Symbol.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stoppable">
+    <Position X="2.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAoAAAAgAAAAAEAAAAAAAAAAiAAAAAgBgAAAAAAA=</HashCode>
+      <FileName>src\WorkerCompanion.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WorkerCompanion">
+    <Position X="0.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgCAQAAAEAAAAAAAAAAAAAAAAgAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\WorkerCompanion.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageBus">
+    <Position X="7" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABABAAAAAAAAgAAAAAIAAABAIAAAEAAAAQAAAAAAA=</HashCode>
+      <FileName>lib\MessageBus.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Threads">
+    <Position X="2.75" Y="8.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Struct Name="Threads::WorkerData">
+        <TypeIdentifier>
+          <NewMemberFileName>lib\Threads.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>BCAAABAAACAIAAAAAAAQAAAEBAQAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>lib\Threads.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="Point">
+    <Position X="2.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAQAAAAAAAAAAAABgAAAAAAA=</HashCode>
+      <FileName>lib\Utils.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Typedef Name="Row" Collapsed="true">
+    <Position X="4.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Board.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Enum Name="BoardSizes">
+    <Position X="2.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgABAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAABA=</HashCode>
+      <FileName>src\Board.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="ScorePoints">
+    <Position X="4.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAAAAAAAAAAAAAAAAAAgAAAAAAiAAAAAA=</HashCode>
+      <FileName>src\GamePlayMessages.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="TurnActions">
+    <Position X="6.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAEAAAA=</HashCode>
+      <FileName>src\GamePlayMessages.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

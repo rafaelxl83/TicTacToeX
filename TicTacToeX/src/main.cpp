@@ -65,13 +65,13 @@ void FirstGame()
 	MessageBus::GetInstance();
 
 	std::shared_ptr<Players> playersPtr(p);
-	Threads::GetInstance().AddPlayerWork([playersPtr]()
+	Threads::GetInstance().AddPlayerWork([=]()
 		{
 			playersPtr->Start();
 		});
 
 	std::shared_ptr<GamePlay> gamePlayPtr(g);
-	Threads::GetInstance().AddBoardWork([&gamePlayPtr]()
+	Threads::GetInstance().AddBoardWork([=]()
 		{
 			gamePlayPtr->Start();
 		});

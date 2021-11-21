@@ -54,6 +54,9 @@
     <ClCompile Include="src\Players.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\NPCPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ExceptionHelper.h">
@@ -92,5 +95,11 @@
     <ClInclude Include="src\Symbol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\NPCPlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

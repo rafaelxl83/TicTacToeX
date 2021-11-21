@@ -32,7 +32,7 @@ public:
 											Symbol						aSymbol, 
 											std::istream&				aStream);
 
-	unsigned int						MakeAMove();
+	virtual unsigned int				MakeAMove();
 	
 	void								SetSymbol(
 											Symbol						aSymbol);
@@ -70,6 +70,7 @@ private:
 	std::vector<unsigned int>			myBoards;
 	std::istream&						myStream;
 
+	friend class						NPCPlayer;
 };
 
 #ifdef _DEBUG

@@ -485,9 +485,9 @@ GamePlay::HasWinner(
 	if (aBoard.GetMarkedPositions().size() < 5)
 		return Symbol(0);
 
-	int s = aBoard.GetSize() - 1;
-	std::weak_ptr<Row[]> aSection;
+	int s = 0;
 	std::vector<Point> marked = aBoard.GetMarkedPositions();
+	//s = aBoard.GetSize() - 1;
 	//std::vector<Point> ignore = {Point(), Point(0,s), Point(s,0), Point(s,s)};
 
 	//// No need to check corners

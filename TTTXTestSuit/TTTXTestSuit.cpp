@@ -18,6 +18,7 @@
 #include "..\TicTacToeX\src\Board.h"
 #include "..\TicTacToeX\src\Player.h"
 #include "..\TicTacToeX\src\GamePlay.h"
+#include "..\TicTacToeX\src\NPCPlayer.h"
 #pragma endregion
 
 #define TEST_DEFAULT_ID					static_cast<unsigned int>(GetHashID(GenKey("TEST")))
@@ -1132,6 +1133,46 @@ namespace TTTXTestSuit
 			}
 
 			Assert::AreEqual(board->GetID(), boardID);
+		}
+#pragma endregion
+	};
+#pragma endregion
+
+#pragma region "NPC Unit Test"
+	TEST_CLASS(NPCTestSuit)
+	{
+	public:
+		std::shared_ptr<Helper::GameBase4Test> emu;
+		NPCPlayer* nPlayer;
+		char nPlayer_id[128];
+
+#pragma region "Initialize and cleanup tests"
+		TEST_METHOD_INITIALIZE(Startup)
+		{
+			// method initialization code
+			emu = std::make_shared<Helper::GameBase4Test>(Helper::GameBase4Test());
+			sprintf_s(nPlayer_id, "%s", GenKey("NPC1"));
+		}
+
+		TEST_METHOD_CLEANUP(End)
+		{
+			// test method cleanup  code
+		}
+#pragma endregion
+
+#pragma region "Unit Tests"
+		TEST_METHOD(TestMethod1)
+		{
+			nPlayer = new NPCPlayer(
+				emu->p1ID,
+				"NPC1",
+				Symbol(Symbol::AvailableSymbols::X));
+
+			nPlayer->AddBoardId(emu->boardID);
+			nPlayer->SetState(Player::PlayerState::Turn);
+			int m = nPlayer->MakeAMove();
+
+			Assert::AreEqual("", "");
 		}
 #pragma endregion
 	};

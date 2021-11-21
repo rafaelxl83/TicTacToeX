@@ -154,6 +154,7 @@
     <ClCompile Include="src\ExceptionHelper.cpp" />
     <ClCompile Include="src\GamePlay.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\NPCPlayer.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\Players.cpp" />
     <ClCompile Include="src\Symbol.cpp" />
@@ -168,10 +169,14 @@
     <ClInclude Include="src\ExceptionHelper.h" />
     <ClInclude Include="src\GamePlay.h" />
     <ClInclude Include="src\GamePlayMessages.h" />
+    <ClInclude Include="src\NPCPlayer.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\Players.h" />
     <ClInclude Include="src\Symbol.h" />
     <ClInclude Include="src\WorkerCompanion.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
