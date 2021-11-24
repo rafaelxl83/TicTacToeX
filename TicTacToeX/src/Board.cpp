@@ -129,8 +129,8 @@ Board::Initialize()
 
 	for (int i = 0; i < realSize; ++i)
 	{
-		if(i < 3) theSection[i] = Row(3, 0);
-		theBoard[i] = Row(realSize, 0);
+		if(i < 3) theSection[i] = Row(3, Symbol(0));
+		theBoard[i] = Row(realSize, Symbol(0));
 	}
 
 	int k = 1;

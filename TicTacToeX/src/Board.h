@@ -8,6 +8,7 @@
 #include <optional>
 
 #define VERIFICATION_ADJUSTMENT 2
+#define	NO_NEIGHBOR				2 * (int)Symbol::AvailableSymbols::empty
 
 enum class BoardSizes : short
 {

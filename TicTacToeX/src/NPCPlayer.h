@@ -17,7 +17,7 @@ public:
 	unsigned int					MakeAMove() override;
 
 	void							SetBoard(
-										std::shared_ptr<Board>		aBoard);
+										Board*						aBoard);
 
 private:
 	int								EvaluateBoard();
@@ -34,8 +34,11 @@ private:
 										std::function<int (int)>	eValuation);
 	int								Evaluate(
 										int							aValue);
+	int								EvaluateMe(
+										int							aValue);
 
 	std::shared_ptr<Board>			theBoard;
 	std::stringbuf					buffer;
+	std::vector<Point>				cells2Verify;
 };
 

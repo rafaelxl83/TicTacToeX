@@ -433,6 +433,150 @@ namespace TTTXTestSuit
 			}
 #pragma endregion
 
+#pragma region "GamePlay Validation"
+			bool EndOfGame()
+			{
+				return board->IsFull() || 
+					HasWinner(*board) != Symbol::AvailableSymbols::empty;
+			}
+
+			Symbol HasWinner(
+					Board& aBoard)
+			{
+				// There are no winners before the 5th mark
+				if (aBoard.GetMarkedPositions().size() < 5)
+					return Symbol(0);
+
+				int s = 0;
+				std::vector<Point> marked = aBoard.GetMarkedPositions();
+
+				for (Point p : marked)
+				{
+					s = CheckSection(aBoard, p);
+					if (s != 0)
+						break;
+				}
+
+				return Symbol(s);
+			}
+
+			int CheckSection(
+					Board& aBoard,
+					Point						aPoint)
+			{
+				int sum = 0;
+				std::shared_ptr<Row[]> aSection = aBoard.GetSector(aPoint).lock();
+
+#pragma region "Horizontal"
+				sum = aSection[0][0].GetProperty().value +
+					aSection[0][1].GetProperty().value +
+					aSection[0][2].GetProperty().value;
+				sum = Evaluate(sum);
+				if (sum > 0)
+				{
+					TEST_OUTPUT(L"CheckSection H1: %d", sum);
+					return sum;
+				}
+
+				sum = aSection[1][0].GetProperty().value +
+					aSection[1][1].GetProperty().value +
+					aSection[1][2].GetProperty().value;
+				sum = Evaluate(sum);
+				if (sum > 0)
+				{
+					TEST_OUTPUT(L"CheckSection H2: %d", sum);
+					return sum;
+				}
+
+				sum = aSection[2][0].GetProperty().value +
+					aSection[2][1].GetProperty().value +
+					aSection[2][2].GetProperty().value;
+				sum = Evaluate(sum);
+				if (sum > 0)
+				{
+					TEST_OUTPUT(L"CheckSection H3: %d", sum);
+					return sum;
+				}
+#pragma endregion
+
+#pragma region "Vertical"
+				sum = aSection[0][0].GetProperty().value +
+					aSection[1][0].GetProperty().value +
+					aSection[2][0].GetProperty().value;
+				sum = Evaluate(sum);
+				if (sum > 0)
+				{
+					TEST_OUTPUT(L"CheckSection V1: %d", sum);
+					return sum;
+				}
+
+				sum = aSection[0][1].GetProperty().value +
+					aSection[1][1].GetProperty().value +
+					aSection[2][1].GetProperty().value;
+				sum = Evaluate(sum);
+				if (sum > 0)
+				{
+					TEST_OUTPUT(L"CheckSection V2: %d", sum);
+					return sum;
+				}
+
+				sum = aSection[0][2].GetProperty().value +
+					aSection[1][2].GetProperty().value +
+					aSection[2][2].GetProperty().value;
+				sum = Evaluate(sum);
+				if (sum > 0)
+				{
+					TEST_OUTPUT(L"CheckSection V3: %d", sum);
+					return sum;
+				}
+#pragma endregion
+
+#pragma region "Diagonal"
+				sum = aSection[0][0].GetProperty().value +
+					aSection[1][1].GetProperty().value +
+					aSection[2][2].GetProperty().value;
+				sum = Evaluate(sum);
+				if (sum > 0)
+				{
+					TEST_OUTPUT(L"CheckSection D1: %d", sum);
+					return sum;
+				}
+
+				sum = aSection[0][2].GetProperty().value +
+					aSection[1][1].GetProperty().value +
+					aSection[2][0].GetProperty().value;
+				sum = Evaluate(sum);
+				if (sum > 0)
+				{
+					TEST_OUTPUT(L"CheckSection D2: %d", sum);
+					return sum;
+				}
+#pragma endregion
+
+				return 0;
+			}
+
+			int Evaluate(
+					int							aValue)
+			{
+				switch (aValue)
+				{
+				case (int)Symbol::AvailableSymbols::X * 3:
+					return 1;
+				case (int)Symbol::AvailableSymbols::O * 3:
+					return 2;
+				case (int)Symbol::AvailableSymbols::M * 3:
+					return 3;
+				case (int)Symbol::AvailableSymbols::S * 3:
+					return 4;
+				case (int)Symbol::AvailableSymbols::H * 3:
+					return 5;
+				default:
+					return 0;
+				}
+			}
+#pragma endregion
+
 #pragma region "Base test variables"
 			EventTable evt;
 			unsigned int evtID;
@@ -1146,12 +1290,16 @@ namespace TTTXTestSuit
 		NPCPlayer* nPlayer;
 		char nPlayer_id[128];
 
+		Player* player;
+		char player_id[128];
+
 #pragma region "Initialize and cleanup tests"
 		TEST_METHOD_INITIALIZE(Startup)
 		{
 			// method initialization code
 			emu = std::make_shared<Helper::GameBase4Test>(Helper::GameBase4Test());
 			sprintf_s(nPlayer_id, "%s", GenKey("NPC1"));
+			sprintf_s(player_id, "%s", GenKey("Player"));
 		}
 
 		TEST_METHOD_CLEANUP(End)
@@ -1161,7 +1309,7 @@ namespace TTTXTestSuit
 #pragma endregion
 
 #pragma region "Unit Tests"
-		TEST_METHOD(TestMethod1)
+		TEST_METHOD(NPCRandomMarkTest)
 		{
 			nPlayer = new NPCPlayer(
 				emu->p1ID,
@@ -1169,10 +1317,61 @@ namespace TTTXTestSuit
 				Symbol(Symbol::AvailableSymbols::X));
 
 			nPlayer->AddBoardId(emu->boardID);
+			nPlayer->SetBoard(emu->board);
 			nPlayer->SetState(Player::PlayerState::Turn);
 			int m = nPlayer->MakeAMove();
 
 			Assert::AreEqual("", "");
+		}
+
+		TEST_METHOD(NPCBlockMarkTest)
+		{
+			unsigned int move = 0, t = 1;
+
+			std::stringbuf buffer;
+			std::iostream input(&buffer);
+
+			nPlayer = new NPCPlayer(
+				emu->p1ID,
+				"NPC1",
+				Symbol(Symbol::AvailableSymbols::X));
+			nPlayer->AddBoardId(emu->boardID);
+			nPlayer->SetBoard(emu->board);
+
+			player = new Player(
+				emu->p1ID,
+				"Momo20171109",
+				Symbol(Symbol::AvailableSymbols::O),
+				input);
+			player->AddBoardId(emu->boardID);
+
+			do
+			{
+				do
+				{
+					nPlayer->SetState(Player::PlayerState::Turn);
+					move = nPlayer->MakeAMove();
+					nPlayer->SetState(Player::PlayerState::Idle);
+				} while (!emu->board->SetMark(move, nPlayer->GetPlayerSymbol()));
+
+				if (emu->EndOfGame())
+					break;
+
+				do
+				{
+					player->SetState(Player::PlayerState::Turn);
+					move = emu->EmulatePlayerEntry(*player, input, Random(1, 9));
+					player->SetState(Player::PlayerState::Idle);
+				} while (!emu->board->SetMark(move, player->GetPlayerSymbol()));
+			} while (!emu->EndOfGame());
+
+			input << std::endl;
+			emu->board->PrintBoard(input);
+			std::string str = buffer.str();
+			TEST_OUTPUT(L"NPCBlockMarkTest: \n%s",
+				Helper::mbs2wcs((char*)str.c_str()));
+
+			Assert::AreEqual(emu->EndOfGame(), true);
 		}
 #pragma endregion
 	};

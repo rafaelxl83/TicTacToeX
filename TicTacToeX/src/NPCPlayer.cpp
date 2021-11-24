@@ -10,8 +10,9 @@
 			  P1.y + P2.y - 1 )
 
 #define Empty(P1, P2, P3) \
-	P1.GetProperty().value == P2.GetProperty().value ? 3 :\
-	P2.GetProperty().value == P3.GetProperty().value ? 1 : 2
+	P1.GetProperty().value == (int)Symbol::AvailableSymbols::empty ? 1 :\
+	P2.GetProperty().value == (int)Symbol::AvailableSymbols::empty ? 2 :\
+	P3.GetProperty().value == (int)Symbol::AvailableSymbols::empty ? 3 : 0
 
 
 NPCPlayer::NPCPlayer(
@@ -30,33 +31,62 @@ NPCPlayer::NPCPlayer(
 unsigned int
 NPCPlayer::MakeAMove()
 {
-	((std::iostream&)myStream) << 10;
-	int mark = Player::MakeAMove();
+	unsigned int mark = NO_MARK;
+	/*((std::iostream&)myStream) << 10;
+	mark = Player::MakeAMove();
 
 	myStream.get();
-	myStream.clear();
+	myStream.clear();*/
+	
+	if (myState == PlayerState::Turn)
+	{
+		mark = EvaluateBoard();
+		if (mark == 0)
+		{
+			int upLimit = theBoard->GetSize();
+			upLimit *= upLimit;
+			mark = Random(1, upLimit);
+		}
+	}
+
 	return mark;
 }
 
 void
 NPCPlayer::SetBoard(
-	std::shared_ptr<Board>		aBoard)
+	Board*						aBoard)
 {
-	return;
-}
+	theBoard = std::shared_ptr<Board>(aBoard);
 
+	int bSize = theBoard->GetSize() - 2;
+	int verifSize = bSize * bSize;
+	
+	for (int k = 0, i = 1, j = 1; k < verifSize; k++)
+	{
+		cells2Verify.push_back(Point(i, j));
+		(j < bSize ? j++ : (j = 1, i++));
+	}
+}
 
 int
 NPCPlayer::EvaluateBoard()
 {
-	int s = 0;
-	std::vector<Point> marked = theBoard->GetMarkedPositions();
+	if (theBoard->GetMarkedPositions().size() <= 3)
+		return 0;
 
-	for (Point p : marked)
+	int s = 0;
+	for (Point p : cells2Verify)
 	{
-		s = CheckSection(p, [this](int v) { return Evaluate(v); });
-		if (s != 0)
-			break;
+		// First check the opportunity to be the winner
+		s = CheckSection(p, [this](int v) { return EvaluateMe(v); });
+		if (s != 0) break;
+		else
+		{
+			// Check if there are any opponent victory menace
+			s = CheckSection(p, [this](int v) { return Evaluate(v); });
+			if (s != 0)
+				break;
+		}
 	}
 
 	return s;
@@ -157,19 +187,32 @@ NPCPlayer::CheckLine(
 		aSection[aPos1.x][aPos1.y].GetProperty().value +
 		aSection[aPos2.x][aPos2.y].GetProperty().value +
 		aSection[aPos3.x][aPos3.y].GetProperty().value;
+
 	sum = eValuation(sum);
 	if (sum > 0)
 	{
+		// There are a situation where the opponent
+		// can win  the match or the current NPC 
+		// player can be the winner.
+		// find the correct spot
 		switch (Empty(
 			aSection[aPos1.x][aPos1.y], 
 			aSection[aPos2.x][aPos2.y], 
 			aSection[aPos3.x][aPos3.y]))
 		{
-		case 1: p = Convert(aPoint, aPos1); break;
-		case 2: p = Convert(aPoint, aPos2); break;
-		case 3: p = Convert(aPoint, aPos3); break;
+			case 1: p = Convert(aPoint, aPos1); break;
+			case 2: p = Convert(aPoint, aPos2); break;
+			case 3: p = Convert(aPoint, aPos3); break;
+			default: return 0;
 		}
-		sum = Calculate(p, theBoard->GetSize());
+
+		// return the spot position to avoid a 
+		// winner or to be the winner
+		int size = theBoard->GetSize();
+		sum = Calculate(p, size);
+
+		if (0 >= sum || sum > size * size)
+			return 0;
 	}
 	return sum;
 }
@@ -177,7 +220,14 @@ int
 NPCPlayer::Evaluate(
 	int							aValue)
 {
-	switch (aValue - (int)Symbol::AvailableSymbols::empty)
+	if (aValue >= NO_NEIGHBOR)
+		return 0;
+
+	int currVal = aValue - (int)Symbol::AvailableSymbols::empty;
+	if (mySymbol.GetProperty().value * 2 == currVal)
+		return 0;
+
+	switch (currVal)
 	{
 	case (int)Symbol::AvailableSymbols::X * 2:
 		return 1;
@@ -192,4 +242,17 @@ NPCPlayer::Evaluate(
 	default:
 		return 0;
 	}
+}
+int
+NPCPlayer::EvaluateMe(
+	int							aValue)
+{
+	if (aValue >= NO_NEIGHBOR)
+		return 0;
+
+	int currVal = aValue - (int)Symbol::AvailableSymbols::empty;
+	if (mySymbol.GetProperty().value * 2 == currVal)
+		return 1;
+
+	return 0;
 }

@@ -26,8 +26,8 @@ extern std::mutex logMutex;
 
 struct Point
 {
-	unsigned short x = 0;
-	unsigned short y = 0;
+	short x = 0;
+	short y = 0;
 
 	Point()
 	:Point(0,0)
@@ -35,8 +35,8 @@ struct Point
 	}
 
 	Point(
-		unsigned short x, 
-		unsigned short y)
+		short x, 
+		short y)
 	{
 		this->x = x;
 		this->y = y;

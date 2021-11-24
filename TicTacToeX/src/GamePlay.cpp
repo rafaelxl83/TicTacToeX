@@ -613,6 +613,9 @@ int
 GamePlay::Evaluate(
 	int							aValue)
 {
+	if (aValue >= NO_NEIGHBOR)
+		return 0;
+	
 	switch (aValue)
 	{
 		case (int)Symbol::AvailableSymbols::X * 3:
