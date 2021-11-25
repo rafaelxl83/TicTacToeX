@@ -436,8 +436,13 @@ namespace TTTXTestSuit
 #pragma region "GamePlay Validation"
 			bool EndOfGame()
 			{
-				return board->IsFull() || 
-					HasWinner(*board) != Symbol::AvailableSymbols::empty;
+				return EndOfGame(board);
+			}
+
+			bool EndOfGame(Board* aBoard)
+			{
+				return aBoard->IsFull() ||
+					HasWinner(*aBoard) != Symbol::AvailableSymbols::empty;
 			}
 
 			Symbol HasWinner(
@@ -1372,6 +1377,62 @@ namespace TTTXTestSuit
 				Helper::mbs2wcs((char*)str.c_str()));
 
 			Assert::AreEqual(emu->EndOfGame(), true);
+		}
+
+		TEST_METHOD(NPC5PlayersMatchTest)
+		{
+			Board* board = new Board(
+				BoardSizes::FivePlayers,
+				GetHashID(GenKey("NPCBOARD")));
+
+			std::vector<NPCPlayer*> npcs = {
+				new NPCPlayer(
+					GetHashID(GenKey("NPC1")), "NPC1",
+					Symbol(Symbol::AvailableSymbols::X)),
+				new NPCPlayer(
+					GetHashID(GenKey("NPC2")), "NPC2",
+					Symbol(Symbol::AvailableSymbols::O)),
+				new NPCPlayer(
+					GetHashID(GenKey("NPC3")), "NPC3",
+					Symbol(Symbol::AvailableSymbols::M)),
+				new NPCPlayer(
+					GetHashID(GenKey("NPC4")), "NPC4",
+					Symbol(Symbol::AvailableSymbols::S)),
+				new NPCPlayer(
+					GetHashID(GenKey("NPC5")), "NPC5",
+					Symbol(Symbol::AvailableSymbols::H))
+			};
+
+			for (NPCPlayer* p: npcs)
+			{
+				p->AddBoardId(board->GetID());
+				p->SetBoard(board);
+			}
+
+			int move = 0, index = 0;
+			do
+			{
+				NPCPlayer* p = npcs[index];
+				do
+				{
+					p->SetState(Player::PlayerState::Turn);
+					move = p->MakeAMove();
+					p->SetState(Player::PlayerState::Idle);
+				} while (!board->SetMark(move, p->GetPlayerSymbol()));
+
+				(index < npcs.size() - 1 ? index++ : index = 0);
+
+			} while (!emu->EndOfGame(board));
+
+			std::stringbuf buffer;
+			std::ostream os(&buffer);
+
+			board->PrintBoard(os);
+			std::string str = buffer.str();
+			TEST_OUTPUT(L"NPC5PlayersMatchTest: \n%s",
+				Helper::mbs2wcs((char*)str.c_str()));
+
+			Assert::AreEqual(emu->EndOfGame(board), true);
 		}
 #pragma endregion
 	};
