@@ -74,26 +74,29 @@ public:
 
 	MessageEndOfGame(
 		unsigned int anId,
-		int aWinner)
-		: MessageGamePlayBase(anId)
-		, theWinner(aWinner)
+		unsigned int aBoardId)
+		: MessageGamePlayBase(
+			anId, 0, aBoardId)
 	{
 	}
 
 	MessageEndOfGame(
 		unsigned int aPlayerId,
-		unsigned int aBoardId)
+		unsigned int aBoardId,
+		int aWinner)
 		: MessageGamePlayBase(
 			aPlayerId, aBoardId)
+		, theWinner(aWinner)
 	{
 	}
 
 	MessageEndOfGame(
 		unsigned int anId,
+		unsigned int aPlayerId,
 		unsigned int aBoardId,
 		int aWinner)
 		: MessageGamePlayBase(
-			anId, aBoardId)
+			anId, aPlayerId, aBoardId)
 		, theWinner(aWinner)
 	{
 	}

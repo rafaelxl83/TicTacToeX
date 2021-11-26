@@ -91,13 +91,15 @@ Players::OnMessageTurnChanged(
 		// all others must be with the idle state
 		// with the correct player listed must send the message
 		// to perform a movement
-		if(player.value()->GetState() == Player::PlayerState::Turn)
+		if (player.value()->GetState() == Player::PlayerState::Turn)
+		{
 			SEND_TO_PLAYERS(MessageSingleMove(
 				aMessage.callerId,
 				player.value()->GetID(),
-				player.value()->GetBoardId(0).value(), 
+				player.value()->GetBoardId(0).value(),
 				0, symbol
-				));
+			));
+		}
 
 		// call the turn of events
 		// just the board can confirm if its

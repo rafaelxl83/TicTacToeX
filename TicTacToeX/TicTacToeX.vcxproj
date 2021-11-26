@@ -157,6 +157,7 @@
     <ClCompile Include="src\NPCPlayer.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\Players.cpp" />
+    <ClCompile Include="src\ScoreBoardTable.cpp" />
     <ClCompile Include="src\Symbol.cpp" />
     <ClCompile Include="src\WorkerCompanion.cpp" />
   </ItemGroup>
@@ -172,6 +173,7 @@
     <ClInclude Include="src\NPCPlayer.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\Players.h" />
+    <ClInclude Include="src\ScoreBoardTable.h" />
     <ClInclude Include="src\Symbol.h" />
     <ClInclude Include="src\WorkerCompanion.h" />
   </ItemGroup>

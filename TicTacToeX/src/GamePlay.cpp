@@ -21,12 +21,19 @@ GamePlay::OnMessageEndOfGame(
 			// one
 			SEND_TO_PLAYERS(MessageEndOfGame(
 				aMessage.callerId,
+				aMessage.myPlayerId,
+				aMessage.myBoardId,
 				aMessage.theWinner));
 
 			SEND_TO_GAMEPLAY(MessageShutdown(
 				aMessage.callerId));
 
-			Log("[GamePlay]", "OnMessageEndOfGame");
+			std::optional<ScoreBoardTable*> s = GetScoreTable(aMessage.myBoardId);
+			if (s.has_value())
+				Log("[GamePlay]", "OnMessageEndOfGame", 
+					s.value()->PrintScoreboard(aMessage.myBoardId));
+			else
+				Log("[GamePlay]", "OnMessageEndOfGame");
 		}
 	}
 	catch (std::system_error& ex)
@@ -96,6 +103,7 @@ GamePlay::OnMessageTurnChanged(
 
 				SEND_TO_GAMEPLAY(MessageEndOfGame(
 					aMessage.callerId,
+					aMessage.myPlayerId,
 					aMessage.myBoardId,
 					(int)theWinner.GetProperty().symbol));
 			}
@@ -113,8 +121,7 @@ GamePlay::OnMessageTurnChanged(
 			else
 				SEND_TO_GAMEPLAY(MessageEndOfGame(
 					aMessage.callerId,
-					aMessage.myBoardId,
-					(int)Symbol::AvailableSymbols::empty));
+					aMessage.myBoardId));
 		}
 	}
 	catch (std::system_error& ex)
@@ -233,8 +240,20 @@ GamePlay::OnMessageScorePoints(
 		if (!shutDown)
 		{
 			// Register the points 
-			std::cout << "Player: [" << Symbol((Symbol::AvailableSymbols)aMessage.symbol);
-			std::cout << "] Scored points: [" << aMessage.points << "]" << std::endl;
+			std::optional<ScoreBoardTable*> s = GetScoreTable(aMessage.myBoardId);
+			if (s.has_value())
+				s.value()->ScorePoints(
+					aMessage.myBoardId, 
+					aMessage.myPlayerId, 
+					aMessage.points,
+					((Symbol)(Symbol::AvailableSymbols)aMessage.symbol).GetProperty().ico);
+			else
+				Log("[GamePlay]", "OnMessageScorePoints",
+					"WARNNING", "No score table found for this board");
+
+			Log("[GamePlay]", "OnMessageScorePoints",
+				"Player: [", Symbol((Symbol::AvailableSymbols)aMessage.symbol),
+				"] Scored points: [", aMessage.points, "]");
 		}
 
 	}
@@ -350,6 +369,7 @@ GamePlay::AddBoard(
 {
 	myBoards.push_back(aBoard);
 	myEvtTables.push_back(new EventTable(aBoard->GetID()));
+	myScoreTables.push_back(new ScoreBoardTable(aBoard->GetID()));
 }
 void
 GamePlay::AddBoards(
@@ -360,7 +380,10 @@ GamePlay::AddBoards(
 	//myBoards = std::move(allBoards); //old method
 	std::ranges::move(allBoards, std::back_inserter(myBoards));
 	for (auto b : myBoards)
+	{
 		myEvtTables.push_back(new EventTable(b->GetID()));
+		myScoreTables.push_back(new ScoreBoardTable(b->GetID()));
+	}
 }
 
 std::optional<Board*>
@@ -473,6 +496,33 @@ std::vector<EventTable*>
 GamePlay::GetAllEvtTables()
 {
 	return myEvtTables;
+}
+#pragma endregion
+
+#pragma region "Score Table methods"
+std::optional<ScoreBoardTable*>
+GamePlay::GetScoreTable(
+	int							anIndex)
+{
+	return std::make_optional(myScoreTables[anIndex]);
+}
+std::optional<ScoreBoardTable*>
+GamePlay::GetScoreTable(
+	unsigned int				aTableId)
+{
+	auto table = std::ranges::find_if(
+		myScoreTables,
+		[aTableId](ScoreBoardTable* s) { return (s->GetID() == aTableId); });
+
+	if (table != myScoreTables.end())
+		return std::make_optional(*table);
+
+	return std::nullopt;
+}
+std::vector<ScoreBoardTable*>
+GamePlay::GetAllScoreTables()
+{
+	return myScoreTables;
 }
 #pragma endregion
 

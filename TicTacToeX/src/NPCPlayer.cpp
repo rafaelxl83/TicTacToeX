@@ -224,6 +224,8 @@ NPCPlayer::Evaluate(
 		return 0;
 
 	int currVal = aValue - (int)Symbol::AvailableSymbols::empty;
+	// It is the current NPC player, the action should be take
+	// before evaluate the others players
 	if (mySymbol.GetProperty().value * 2 == currVal)
 		return 0;
 

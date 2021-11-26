@@ -19,6 +19,7 @@
 #include "..\TicTacToeX\src\Player.h"
 #include "..\TicTacToeX\src\GamePlay.h"
 #include "..\TicTacToeX\src\NPCPlayer.h"
+#include "..\TicTacToeX\src\ScoreBoardTable.h"
 #pragma endregion
 
 #define TEST_DEFAULT_ID					static_cast<unsigned int>(GetHashID(GenKey("TEST")))
@@ -905,6 +906,96 @@ namespace TTTXTestSuit
 	};
 #pragma endregion
 
+#pragma region "Scoreboard Table Unit Test Class Template"
+	TEST_CLASS(ScoreboardUnitTest)
+	{
+	public:
+		ScoreBoardTable* sbt;
+		unsigned int p1Id;
+		unsigned int p2Id;
+		unsigned int board_Id;
+
+#pragma region "Initialize and cleanup tests"
+		TEST_METHOD_INITIALIZE(Startup)
+		{
+			// method initialization code
+			sbt = new ScoreBoardTable();
+			p1Id = GetHashID(GenKey("PLAYER1"));
+			p2Id = GetHashID(GenKey("PLAYER2"));
+			board_Id = GetHashID(GenKey("BOARD1"));
+		}
+
+		TEST_METHOD_CLEANUP(End)
+		{
+			// test method cleanup  code
+		}
+#pragma endregion
+
+#pragma region "Unit Tests"
+		TEST_METHOD(ScorepointsTest)
+		{
+			sbt->ScorePoints(board_Id, p1Id, 10, 'X');
+			Assert::AreEqual(
+				sbt->GetPlayersScore(p1Id, board_Id).has_value(), true);
+		}
+
+		TEST_METHOD(GetScoreRowTest)
+		{
+			sbt->ScorePoints(board_Id, p1Id, 10, 'X');
+			Assert::AreEqual(
+				sbt->GetPlayersScore(p1Id, board_Id).value()->points, (double)10);
+		}
+
+		TEST_METHOD(UpdateScoreRowTest)
+		{
+			sbt->ScorePoints(board_Id, p1Id, 10, 'X');
+			sbt->ScorePoints(board_Id, p1Id, 10, 'X');
+			sbt->ScorePoints(board_Id, p2Id, -5, 'O');
+			sbt->ScorePoints(board_Id, p1Id, 100, 'X');
+
+			std::string str = sbt->PrintScoreboard(board_Id);
+			TEST_OUTPUT(L"UpdateScoreRowTest: \n%s",
+				Helper::mbs2wcs((char*)str.c_str()));
+
+			Assert::AreEqual(
+				sbt->GetPlayersScore(p1Id, board_Id).value()->points, (double)120);
+		}
+
+		TEST_METHOD(UpdateScoreRow2BoardsTest)
+		{
+			unsigned int board2_Id = GetHashID(GenKey("BOARD2"));
+			unsigned int p3Id = GetHashID(GenKey("PLAYER2"));
+
+			sbt->ScorePoints(board_Id, p1Id, 10, 'X');
+			sbt->ScorePoints(board2_Id, p1Id, 10, 'H');
+			sbt->ScorePoints(board_Id, p2Id, -5, 'O');
+			sbt->ScorePoints(board_Id, p1Id, 100, 'X');
+
+			sbt->ScorePoints(board2_Id, p1Id, 10, 'H');
+			sbt->ScorePoints(board_Id, p1Id, 10, 'X');
+			sbt->ScorePoints(board_Id, p2Id, -5, 'O');
+			sbt->ScorePoints(board2_Id, p1Id, 10, 'H');
+
+			sbt->ScorePoints(board_Id, p3Id, 10, 'M');
+			sbt->ScorePoints(board_Id, p3Id, 50, 'M');
+			sbt->ScorePoints(board_Id, p3Id, -5, 'M');
+			sbt->ScorePoints(board_Id, p3Id, 110, 'M');
+
+			std::string str = sbt->PrintScoreboard(board_Id);
+			TEST_OUTPUT(L"UpdateScoreRowTest: \n%s",
+				Helper::mbs2wcs((char*)str.c_str()));
+
+			str = sbt->PrintScoreboard(board2_Id);
+			TEST_OUTPUT(L"UpdateScoreRowTest: \n%s",
+				Helper::mbs2wcs((char*)str.c_str()));
+
+			Assert::AreEqual(
+				sbt->GetPlayersScore(p1Id, board_Id).value()->points, (double)120);
+		}
+#pragma endregion
+	};
+#pragma endregion
+
 #pragma region "Board Unit Test"
 	TEST_CLASS(BoardUnitTest)
 	{
@@ -1385,7 +1476,7 @@ namespace TTTXTestSuit
 				BoardSizes::FivePlayers,
 				GetHashID(GenKey("NPCBOARD")));
 
-			std::vector<NPCPlayer*> npcs = {
+			std::vector<Player*> npcs = {
 				new NPCPlayer(
 					GetHashID(GenKey("NPC1")), "NPC1",
 					Symbol(Symbol::AvailableSymbols::X)),
@@ -1403,16 +1494,16 @@ namespace TTTXTestSuit
 					Symbol(Symbol::AvailableSymbols::H))
 			};
 
-			for (NPCPlayer* p: npcs)
+			for (Player* p: npcs)
 			{
 				p->AddBoardId(board->GetID());
-				p->SetBoard(board);
+				((NPCPlayer*)p)->SetBoard(board);
 			}
 
 			int move = 0, index = 0;
 			do
 			{
-				NPCPlayer* p = npcs[index];
+				Player* p = npcs[index];
 				do
 				{
 					p->SetState(Player::PlayerState::Turn);
