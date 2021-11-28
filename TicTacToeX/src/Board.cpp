@@ -159,7 +159,7 @@ Board::PrintBoard(
 		line[i * 4 + 3] = '|';
 	line = "\n" + line + "\n";
 
-	Symbol s(markedCells.size() % 5 + 1);
+	Symbol s(markedCells.size() % (mySize - 1) + 1);
 	aStream << "Player turn: [[" << s.GetProperty().ico << "]]\n";
 
 	for (std::pair<int, Point> p : boardMap)

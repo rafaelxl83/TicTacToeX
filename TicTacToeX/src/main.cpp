@@ -6,57 +6,72 @@
 #include "WorkerCompanion.h"
 #include "GamePlay.h"
 #include "Players.h"
+#include "NPCPlayer.h"
 
 #include <map>
 
-void FirstGame()
+void CustomGame()
 {
-	Player* p1 = new Player(
-		GetHashID(GenKey("PLAYER1")),
-		"PLAYER1",
-		Symbol(Symbol::AvailableSymbols::X),
-		std::cin);
+	int amountPlayers = 1;
+	int boardSize = 3;
+	
+	std::cout << "Please, enter the type of the board [2-5]:" << std::endl;
+	std::cout << "(2) Two players" << std::endl;
+	std::cout << "(3) Three players" << std::endl;
+	std::cout << "(4) Four players" << std::endl;
+	std::cout << "(5) Five players" << std::endl;
 
-	Player* p2 = new Player(
-		GetHashID(GenKey("PLAYER2")),
-		"PLAYER2",
-		Symbol(Symbol::AvailableSymbols::O),
-		std::cin);
+	do
+	{
+		std::cin >> boardSize;
+	} while (boardSize > 5 || boardSize < 2);
 
-	Player* p3 = new Player(
-		GetHashID(GenKey("PLAYER3")),
-		"PLAYER3",
-		Symbol(Symbol::AvailableSymbols::M),
-		std::cin);
+	std::cout << "How many humans will play? [0-" << boardSize << "]" << std::endl;
+	do
+	{
+		std::cin >> amountPlayers;
+	} while (boardSize < amountPlayers || amountPlayers < 0);
 
-	Player* p4 = new Player(
-		GetHashID(GenKey("PLAYER4")),
-		"PLAYER4",
-		Symbol(Symbol::AvailableSymbols::S),
-		std::cin);
-
-	Player* p5 = new Player(
-		GetHashID(GenKey("PLAYER5")),
-		"PLAYER5",
-		Symbol(Symbol::AvailableSymbols::H),
-		std::cin);
+	BoardSizes bs;
+	switch (boardSize)
+	{
+	case 3: bs = BoardSizes::ThreePlayers; break;
+	case 4: bs = BoardSizes::FourPlayers; break;
+	case 5: bs = BoardSizes::FivePlayers; break;
+	default: bs = BoardSizes::TwoPlayers; break;
+	}
 
 	Board* board = new Board(
-		BoardSizes::FivePlayers, 
-		GetHashID(GenKey("BOARD1")));
-
-	p1->AddBoardId(board->GetID());
-	p2->AddBoardId(board->GetID());
-	p3->AddBoardId(board->GetID());
-	p4->AddBoardId(board->GetID());
-	p5->AddBoardId(board->GetID());
-
+		bs, GetHashID(GenKey("BOARD1")));
+	
 	Players* p = new Players(1);
-	p->AddPlayer(p1);
-	p->AddPlayer(p2);
-	p->AddPlayer(p3);
-	p->AddPlayer(p4);
-	p->AddPlayer(p5);
+
+	int i = 1;
+	for (; i <= amountPlayers; i++)
+	{
+		std::string pID = "PLAYER" + std::to_string(i);
+		p->AddPlayer(
+			new Player(
+				GetHashID(GenKey(pID.c_str())),
+				pID,
+				Symbol(i),
+				std::cin)
+		);
+		p->GetPlayer(i-1).value()->AddBoardId(board->GetID());
+	}
+
+	for (; i <= boardSize; i++)
+	{
+		std::string pID = "NPC" + std::to_string(i);
+		p->AddPlayer(
+			new NPCPlayer(
+				GetHashID(GenKey(pID.c_str())),
+				pID,
+				Symbol(i))
+		);
+		p->GetPlayer(i-1).value()->AddBoardId(board->GetID());
+		((NPCPlayer*)p->GetPlayer(i-1).value())->SetBoard(board);
+	}
 
 	GamePlay* g = new GamePlay(1);
 	g->AddBoard(board);
@@ -95,8 +110,8 @@ int main()
 		std::cout << std::endl;
 	}*/
 
-	FirstGame();
-
+	//FirstGame();
+	CustomGame();
 
 
 	system("CLS");
