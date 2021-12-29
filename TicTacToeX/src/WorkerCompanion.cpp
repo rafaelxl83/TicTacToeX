@@ -49,32 +49,29 @@ Stoppable::stop()
 }
 #pragma endregion
 
-WorkerCompanion::WorkerCompanion() 
-{
-}
-
 WorkerCompanion::WorkerCompanion(
 	std::shared_ptr<GamePlay>				gameplay,
-	std::shared_ptr<Players>				players)
+	std::shared_ptr<Players>				players,
+	Threads&								threads)
 	: myGamePlay(gameplay)
 	, myPlayers(players)
+	, theThreads(threads)
 {
 }
 
 void WorkerCompanion::run()
 {
 	// Check if thread is requested to stop ?
-	while (stopRequested() == false && !done)
+	while (!stopRequested())
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 		m.lock();
-		/*if (myPlayers->EveryoneArrived())
+		if (myPlayers->IsDone() && myGamePlay->Completed())
 		{
-			myElevators->ShutDown();
-			myHumans->Done();
-			done = true;
-		}*/
+			theThreads.Interrupt();
+			this->stop();
+		}
 		m.unlock();
 	}
 }

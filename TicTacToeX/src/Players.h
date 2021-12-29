@@ -30,6 +30,7 @@ public:
 								const MessageSingleMove&	aMessage) noexcept;
 
 	virtual void			Done();
+	virtual bool			IsDone();
 
 	void					AddPlayer(
 								Player*						aPlayer);

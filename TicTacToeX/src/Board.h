@@ -36,6 +36,7 @@ public:
 										~Board() = default;
 
 	short								GetSize();
+	short								GetTurn();
 	unsigned int						GetID();
 	std::optional<Point>				GetPoint(
 											short						aPos);
@@ -52,6 +53,8 @@ public:
 
 	bool								IsFull();
 	bool								HasUpdate();
+
+	void								Reset();
 
 	void								PrintBoard(
 											std::ostream&				aStream);

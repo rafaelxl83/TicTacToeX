@@ -3,7 +3,7 @@
 #include <condition_variable>
 #include <functional>
 #include <mutex>
-#include <thread>
+#include <boost/thread.hpp>
 #include <vector>
 
 class Threads
@@ -22,6 +22,9 @@ public:
 												std::function<void()>	aWork);
 
 	void									Wait();
+	void									Interrupt();
+
+	void									Reset();
 
 private:
 
@@ -29,7 +32,7 @@ private:
 
 	struct WorkerData
 	{
-		std::thread							myThread;
+		boost::thread						myThread;
 		std::vector<std::function<void()>>	myWork;
 		std::condition_variable				myCv;
 		std::mutex							myMutex;

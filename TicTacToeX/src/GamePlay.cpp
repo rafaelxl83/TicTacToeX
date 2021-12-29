@@ -1,8 +1,9 @@
 #include "GamePlay.h"
 
 #include "../lib/MessageBus.h"
-
 #include "ExceptionHelper.h"
+
+#include <boost/thread.hpp>
 
 #pragma region "Message Events"
 void
@@ -73,6 +74,8 @@ GamePlay::OnMessageTurnChanged(
 		// cyclic event to manage the playthrough
 		if (!shutDown)
 		{
+			//Turn();
+
 			std::optional<Board*> b = GetBoard(aMessage.myBoardId);
 			if (!b.has_value())
 			{
@@ -175,7 +178,6 @@ GamePlay::OnMessageSingleMove(
 
 			if(marked)
 			{
-				Turn();
 				SEND_TO_GAMEPLAY(MessageScorePoints(
 					aMessage.callerId,
 					aMessage.myPlayerId,
@@ -306,7 +308,7 @@ GamePlay::GamePlay(
 
 }
 GamePlay::GamePlay(
-	const unsigned int			anId,
+	const unsigned int				anId,
 	std::vector<Board*>				allBoards)
 	: myId(anId)
 	, myPlayersCount(0)
@@ -317,7 +319,10 @@ GamePlay::GamePlay(
 }
 GamePlay::~GamePlay()
 {
-
+	myBoards.clear();
+	myEvtTables.clear();
+	myScoreTables.clear();
+	RESET_MESSAGEBUSS(MessageShutdown);
 }
 
 void
@@ -348,6 +353,11 @@ GamePlay::ShutDown()
 {
 	shutDown = true;
 }
+bool
+GamePlay::Completed()
+{
+	return shutDown;
+}
 
 void
 GamePlay::Initialize()
@@ -358,6 +368,16 @@ GamePlay::Initialize()
 void
 GamePlay::Turn()
 {
+	int numberOfBoards = myBoards.size();
+	
+	if (numberOfBoards > 1)
+	{
+		int turn = myBoards[myTurnCounter]->GetTurn();
+		int nPlayers = myBoards[myTurnCounter]->GetSize() - 1;
+
+		if (turn == nPlayers)
+			myTurnCounter = myTurnCounter < numberOfBoards ? myTurnCounter + 1: 0;
+	}
 
 }
 #pragma endregion

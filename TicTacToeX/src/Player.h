@@ -31,6 +31,7 @@ public:
 											std::string					aNickName,
 											Symbol						aSymbol, 
 											std::istream&				aStream);
+										~Player() = default;
 
 	virtual unsigned int				MakeAMove();
 	

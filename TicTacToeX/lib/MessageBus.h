@@ -31,6 +31,10 @@ public:
 	void										RegisterPlayer(
 													std::function<void(T)>						aCallback);
 
+	
+	template<typename T>
+	void										Reset();
+
 private:
 												MessageBus() = default;
 	
@@ -89,6 +93,17 @@ MessageBus::RegisterPlayer(
 	myPlayersCallbacks<T>.push_back(std::move(aCallback));
 }
 
+template<typename T>
+void
+MessageBus::Reset()
+{
+	myGamePlayCallbacks<T>.clear();
+	myPlayersCallbacks<T>.clear();
+
+	myGamePlayCallbacks<T>.shrink_to_fit();
+	myPlayersCallbacks<T>.shrink_to_fit();
+}
+
 #define REGISTER_BOARD(MessageType, Func) \
 MessageBus::GetInstance().RegisterBoard<MessageType>([this](const MessageType& aMessage) { Func(aMessage); })
 
@@ -100,3 +115,6 @@ MessageBus::GetInstance().SendToGamePlay(Message)
 
 #define SEND_TO_PLAYERS(Message) \
 MessageBus::GetInstance().SendToPlayers(Message)
+
+#define RESET_MESSAGEBUSS(MessageType) \
+MessageBus::GetInstance().Reset<MessageType>()

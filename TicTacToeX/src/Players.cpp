@@ -1,8 +1,9 @@
 #include "Players.h"
 
 #include "../lib/MessageBus.h"
-
 #include "ExceptionHelper.h"
+
+#include <boost/thread.hpp>
 
 #pragma region "Message Events"
 void
@@ -11,7 +12,7 @@ Players::OnMessageEndOfGame(
 {
 	try
 	{
-		if (done || aMessage.callerId != myId)
+		if (IsDone() || aMessage.callerId != myId)
 			return;
 
 		// check if there are winner or it is a tie
@@ -36,7 +37,7 @@ Players::OnMessageStartOfGame(
 {
 	try
 	{
-		if (done || aMessage.callerId != myId)
+		if (IsDone() || aMessage.callerId != myId)
 			return;
 
 		std::optional<Player*> p = GetPlayer(0);
@@ -70,7 +71,7 @@ Players::OnMessageTurnChanged(
 {
 	try
 	{
-		if (done || aMessage.callerId != myId)
+		if (IsDone() || aMessage.callerId != myId)
 			return;
 
 		Turn((TurnActions)aMessage.turn);
@@ -121,7 +122,7 @@ Players::OnMessageSingleMove(
 {
 	try
 	{
-		if (done || aMessage.callerId != myId)
+		if (IsDone() || aMessage.callerId != myId)
 			return;
 
 		// when called it should get the proper player
@@ -188,7 +189,8 @@ Players::Players(
 }
 Players::~Players()
 {
-
+	myPlayers.clear();
+	RESET_MESSAGEBUSS(MessageShutdown);
 }
 
 void
@@ -213,6 +215,11 @@ void
 Players::Done()
 {
 	done = true;
+}
+bool
+Players::IsDone()
+{
+	return done;
 }
 
 void

@@ -9,6 +9,7 @@
 #include "NPCPlayer.h"
 
 #include <map>
+#include "ExceptionHelper.h"
 
 void CustomGame()
 {
@@ -16,10 +17,10 @@ void CustomGame()
 	int boardSize = 3;
 	
 	std::cout << "Please, enter the type of the board [2-5]:" << std::endl;
-	std::cout << "(2) Two players" << std::endl;
-	std::cout << "(3) Three players" << std::endl;
-	std::cout << "(4) Four players" << std::endl;
-	std::cout << "(5) Five players" << std::endl;
+	std::cout << "(2) Two players"		<< std::endl;
+	std::cout << "(3) Three players"	<< std::endl;
+	std::cout << "(4) Four players"		<< std::endl;
+	std::cout << "(5) Five players"		<< std::endl;
 
 	do
 	{
@@ -35,10 +36,10 @@ void CustomGame()
 	BoardSizes bs;
 	switch (boardSize)
 	{
-	case 3: bs = BoardSizes::ThreePlayers; break;
-	case 4: bs = BoardSizes::FourPlayers; break;
-	case 5: bs = BoardSizes::FivePlayers; break;
-	default: bs = BoardSizes::TwoPlayers; break;
+	case 3:		bs = BoardSizes::ThreePlayers;	break;
+	case 4:		bs = BoardSizes::FourPlayers;	break;
+	case 5:		bs = BoardSizes::FivePlayers;	break;
+	default:	bs = BoardSizes::TwoPlayers;	break;
 	}
 
 	Board* board = new Board(
@@ -76,22 +77,44 @@ void CustomGame()
 	GamePlay* g = new GamePlay(1);
 	g->AddBoard(board);
 
-	Threads::GetInstance().Start();
-	MessageBus::GetInstance();
+	try {
+		Threads::GetInstance().Start();
+		MessageBus::GetInstance();
 
-	std::shared_ptr<Players> playersPtr(p);
-	Threads::GetInstance().AddPlayerWork([=]()
-		{
-			playersPtr->Start();
-		});
+		std::shared_ptr<Players> playersPtr(p);
+		Threads::GetInstance().AddPlayerWork([=]()
+			{
+				playersPtr->Start();
+			});
 
-	std::shared_ptr<GamePlay> gamePlayPtr(g);
-	Threads::GetInstance().AddBoardWork([=]()
-		{
-			gamePlayPtr->Start();
-		});
+		std::shared_ptr<GamePlay> gamePlayPtr(g);
+		Threads::GetInstance().AddBoardWork([=]()
+			{
+				gamePlayPtr->Start();
+			});
 
-	Threads::GetInstance().Wait();
+		// Creating our Task to monitor the work
+		WorkerCompanion task(
+			gamePlayPtr, 
+			playersPtr, 
+			Threads::GetInstance());
+
+		//Creating a thread to execute our task
+		std::thread th([&]()
+			{
+				task.run();
+			});
+
+		th.join();
+
+		Threads::GetInstance().Wait();
+
+		playersPtr.reset();
+		gamePlayPtr.reset();
+	}
+	catch (...) {
+		std::cout << "thread cancelled " << ExceptionHelper::what();
+	}
 }
 
 int main()
@@ -110,11 +133,17 @@ int main()
 		std::cout << std::endl;
 	}*/
 
-	//FirstGame();
-	CustomGame();
-
-
-	system("CLS");
+	char rematch = 'y';
+	do
+	{
+		if (rematch == 'y')
+		{
+			system("CLS");
+			CustomGame();
+			std::cout << "Do you want a rematch?[y -> yes, n -> no]" << std::endl;
+		}
+		std::cin >> rematch;
+	} while (rematch != 'n');
 
 	return 0;
 }

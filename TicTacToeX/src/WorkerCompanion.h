@@ -3,6 +3,7 @@
 
 #include "GamePlay.h"
 #include "Players.h"
+#include "..\lib\Threads.h"
 
 class Stoppable
 {
@@ -33,15 +34,16 @@ private:
 class WorkerCompanion : public Stoppable
 {
 public:
-								WorkerCompanion();
+								WorkerCompanion() = default;
 								WorkerCompanion(
 									std::shared_ptr<GamePlay>		gameplay,
-									std::shared_ptr<Players>		palyers);
+									std::shared_ptr<Players>		palyers,
+									Threads&						threads);
 
 	void						run();
 
 private:
 	std::shared_ptr<GamePlay>	myGamePlay;
 	std::shared_ptr<Players>	myPlayers;
-	bool						done = false;
+	Threads&					theThreads;
 };

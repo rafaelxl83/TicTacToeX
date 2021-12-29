@@ -34,6 +34,12 @@ Board::GetSize()
 	return mySize;
 }
 
+short
+Board::GetTurn()
+{
+	return markedCells.size() % (mySize - 1) + 1;
+}
+
 unsigned int 
 Board::GetID()
 {
@@ -149,6 +155,17 @@ Board::HasUpdate()
 }
 
 void
+Board::Reset()
+{
+	markedCells.clear();
+	theBoard.reset();
+
+	theBoard = std::unique_ptr<Row[]>(new Row[realSize]);
+	for (int i = 0; i < realSize; ++i)
+		theBoard[i] = Row(realSize, Symbol(0));
+}
+
+void
 Board::PrintBoard(
 	std::ostream&				aStream)
 {
@@ -159,7 +176,7 @@ Board::PrintBoard(
 		line[i * 4 + 3] = '|';
 	line = "\n" + line + "\n";
 
-	Symbol s(markedCells.size() % (mySize - 1) + 1);
+	Symbol s(GetTurn());
 	aStream << "Player turn: [[" << s.GetProperty().ico << "]]\n";
 
 	for (std::pair<int, Point> p : boardMap)

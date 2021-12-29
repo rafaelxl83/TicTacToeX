@@ -5,7 +5,7 @@
 using namespace std::literals;
 
 // Shrink this number to make the system go faster.
-static constexpr auto locThreadWaitTime = 1000ms;
+static constexpr auto locThreadWaitTime = 500ms;
 
 void
 Threads::Worker(
@@ -13,29 +13,41 @@ Threads::Worker(
 {
 	std::vector<std::function<void()>> work;
 
-	while(true)
+	try
 	{
+		while(true)
 		{
-			std::unique_lock<std::mutex> lock(aData.myMutex);
-			aData.myCv.wait_for(lock, locThreadWaitTime);
+			{
+				std::unique_lock<std::mutex> lock(aData.myMutex);
+				aData.myCv.wait_for(lock, locThreadWaitTime);
 
-			work.swap(aData.myWork);
+				work.swap(aData.myWork);
+			}
+
+			for(auto& wrk : work)
+			{
+				wrk();
+			}
+
+			work.clear();
+
+			if (boost::this_thread::interruption_requested())
+				break;
 		}
-
-		for(auto& wrk : work)
-		{
-			wrk();
-		}
-
-		work.clear();
+	}
+	catch (boost::thread_interrupted&)
+	{
+		return;
 	}
 }
 
 void
 Threads::Start()
 {
-	myGamePlayData.myThread = std::thread(&Threads::Worker, std::ref(myGamePlayData));
-	myPlayersData.myThread = std::thread(&Threads::Worker, std::ref(myPlayersData));
+	Reset();
+
+	myGamePlayData.myThread = boost::thread(&Threads::Worker, std::ref(myGamePlayData));
+	myPlayersData.myThread = boost::thread(&Threads::Worker, std::ref(myPlayersData));
 }
 
 void
@@ -43,6 +55,23 @@ Threads::Wait()
 {
 	myGamePlayData.myThread.join();
 	myPlayersData.myThread.join();
+}
+
+void
+Threads::Interrupt()
+{
+	myGamePlayData.myThread.interrupt();
+	myPlayersData.myThread.interrupt();
+}
+
+void
+Threads::Reset()
+{
+	myGamePlayData.myWork.clear();
+	myPlayersData.myWork.clear();
+
+	myPlayersData.myWork.shrink_to_fit();
+	myPlayersData.myWork.shrink_to_fit();
 }
 
 void

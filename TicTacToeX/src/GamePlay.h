@@ -37,6 +37,7 @@ public:
 
 	virtual void					Start();
 	virtual void					ShutDown();
+	virtual bool					Completed();
 
 	void							AddBoard(
 										Board*						aBoard);
@@ -98,6 +99,9 @@ private:
 	short							myTurnCounter;
 	Symbol							theWinner;
 	bool							shutDown = false;
+
+	std::mutex mx;
+	std::condition_variable cv;
 
 };
 

@@ -1110,6 +1110,11 @@ namespace TTTXTestSuit
 			aSection = board->GetSector(Point(3, 3));
 			str = emu->Board3x3ToStr(aSection.lock(), (char*)"", false);
 
+			board->Reset();
+			buffer.str("");
+			board->PrintBoard(os);
+			s = buffer.str();
+
 			Assert::AreEqual(str.c_str(), "O[3]M[6] [255]M[6]X[1] [255] [255] [255] [255]");
 		}
 #pragma endregion
