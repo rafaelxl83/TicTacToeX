@@ -93,7 +93,7 @@ S|10|30
 H|15|45
 empty ( )|255|
 
-A four-player board view with all cells marked (no winner) will be like:
+A three-player board view with all cells marked (no winner) will be like:
 
 <pre>
     Indexes             Matrix            Symbols               Debug               Values
