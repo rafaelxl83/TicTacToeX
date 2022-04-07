@@ -10,7 +10,7 @@ The board design is based on the amount of lines for each player. For instance, 
 
  - Commom board (3x3 - two players)
 <pre>
-   Order           Matrix
+  Indexes          Matrix
  1 | 2 | 3       00| 01| 02
 ---|---|---     ---|---|---
  4 | 5 | 6       10| 11| 12 
